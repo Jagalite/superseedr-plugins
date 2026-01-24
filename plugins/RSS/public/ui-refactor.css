@@ -1,0 +1,92 @@
+/* Layout Updates */
+.main-feature {
+    margin-bottom: 2rem;
+}
+
+.card-header-inline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+/* Filter Controls Container */
+.filter-controls-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+@media (min-width: 768px) {
+    .filter-controls-container {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .filter-form.expanded {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .filter-list.horizontal {
+        flex: 1;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin-top: 0;
+        justify-content: flex-start;
+    }
+}
+
+/* Filter List Horizontal Chips */
+.filter-list.horizontal .filter-item {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    background: rgba(139, 92, 246, 0.1);
+    border-color: var(--accent);
+    gap: 0.5rem;
+}
+
+/* Large Feed Preview */
+.feed-preview.large {
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+.feed-preview.large .preview-list {
+    height: 400px;
+    /* Taller */
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.preview-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
+}
+
+.preview-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    /* Larger Text */
+}
+
+/* Reusing existing filter styles but tweaking for horizontal context */
+.filter-info h4 {
+    display: inline;
+    margin-right: 0.5rem;
+}
+
+.filter-info code {
+    display: inline;
+}
+
+/* Adjustments for Filters.css overrides */
+.filter-form {
+    margin-bottom: 0;
+}

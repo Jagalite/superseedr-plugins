@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superseedr RSS Bridge</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="filters.css">
+    <link rel="stylesheet" href="ui-refactor.css">
+    <link rel="stylesheet" href="rss-feeds.css">
+    <link rel="stylesheet" href="toggles.css">
+    <link rel="stylesheet" href="badges.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <span class="icon">⚡</span>
+                <h1>Superseedr <span class="highlight">RSS</span></h1>
+            </div>
+            <div class="status-badge" id="statusBadge">
+                <div class="dot"></div>
+                Initializing...
+            </div>
+        </header>
+
+        <main>
+            <!-- Main Content -->
+            <!-- Top Section: Feed & Filters (Full Width) -->
+            <section class="main-feature">
+                <div class="card">
+                    <div class="card-header-inline">
+                        <h2>Live Feed Explorer</h2>
+                        <div class="preview-controls">
+                            <button type="button" id="refreshFeedBtn" class="icon-btn" title="Refresh Feed">↻</button>
+                        </div>
+                    </div>
+                    <p class="subtitle">Search the feed with regex and add filters to automate downloads.</p>
+
+                    <!-- Config Container (Feeds + Filters) -->
+                    <div class="config-container">
+
+                        <!-- Left: RSS Feeds -->
+                        <div class="config-column">
+                            <h3>RSS Sources</h3>
+                            <div id="rssFeedList" class="rss-feed-list small-list">
+                                <!-- Populated by JS -->
+                            </div>
+                            <form id="addFeedForm" class="sidebar-form">
+                                <div class="input-group">
+                                    <input type="url" id="newRssUrl" placeholder="Add Feed URL..." required>
+                                </div>
+                                <button type="submit" class="btn secondary small-btn">Add Feed</button>
+                            </form>
+                        </div>
+
+                        <!-- Right: Filters -->
+                        <div class="config-column">
+                            <h3>Content Filters</h3>
+                            <div class="filter-list" id="filterList">
+                                <!-- Populated by JS -->
+                            </div>
+                            <form id="addFilterForm" class="filter-form">
+                                <div class="filter-inputs">
+                                    <input type="text" id="newFilterName" placeholder="Name" required
+                                        style="width: 30%">
+                                    <input type="text" id="newFilterRegex" placeholder="Regex" required
+                                        style="width: 70%">
+                                </div>
+                                <button type="submit" class="btn primary small-btn">Add</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Live Preview Large -->
+                    <div class="feed-preview large">
+                        <div class="preview-header">
+                            <span class="match-count" id="matchCount">0 potential matches</span>
+                        </div>
+                        <div class="preview-list" id="previewList">
+                            <div class="preview-item placeholder">Loading feed...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid-layout">
+
+                <!-- Left Column: Settings & Manual -->
+                <section class="column left-col">
+
+                    <!-- Manual Add Card -->
+                    <div class="card">
+                        <h2>Manual Download</h2>
+                        <p class="subtitle">Directly add links.</p>
+                        <form id="manualForm">
+                            <div class="input-group">
+                                <input type="text" id="manualLink" placeholder="magnet:?xt=urn:btih:..." required>
+                            </div>
+                            <button type="submit" class="btn secondary">Send to Client</button>
+                        </form>
+                    </div>
+
+                    <!-- RSS Feeds Moved to Top -->
+
+                    <div class="card info-card">
+                        <h3>Current Watch Directory</h3>
+                        <code id="watchDirDisplay">...</code>
+                    </div>
+
+                </section>
+
+                <!-- Right Column: History -->
+                <section class="column right-col">
+                    <div class="card full-height">
+                        <div class="card-header">
+                            <h2>Download History</h2>
+                            <button id="refreshBtn" class="icon-btn" title="Refresh">↻</button>
+                        </div>
+                        <div class="table-container">
+                            <table id="historyTable">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Usage handled by JS -->
+                                    <tr>
+                                        <td colspan="2" class="empty-state">No history yet.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </div> <!-- End Grid Layout -->
+        </main>
+    </div>
+
+    <div id="toast" class="toast hidden">Action Successful</div>
+    <script src="app.js"></script>
+</body>
+
+</html>

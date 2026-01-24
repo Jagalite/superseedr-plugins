@@ -1,0 +1,41 @@
+/* RSS Feed List */
+.rss-feed-list {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.rss-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--input-bg);
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+    word-break: break-all;
+}
+
+.rss-item .url {
+    color: var(--text-primary);
+}
+
+.sidebar-form {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.sidebar-form .input-group {
+    margin-bottom: 0;
+    flex-grow: 1;
+}
+
+/* Adjust small btn in sidebar context */
+.sidebar-form .small-btn {
+    width: auto;
+    white-space: nowrap;
+}

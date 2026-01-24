@@ -1,0 +1,107 @@
+/* Configuration Grid */
+.config-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+    /* Prevent stretching if one list is long */
+}
+
+@media (min-width: 768px) {
+    .config-container {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.config-column h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+/* Toggles */
+.toggle-switch {
+    width: 32px;
+    height: 18px;
+    background: #334155;
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.toggle-switch.active {
+    background: var(--success);
+}
+
+.toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+}
+
+.toggle-switch.active::after {
+    transform: translateX(14px);
+}
+
+/* List Items with Toggle */
+.rss-item,
+.filter-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.item-content {
+    flex-grow: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.item-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.85rem;
+}
+
+.filter-info h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.filter-info code {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+/* Adjustments */
+.small-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    /* Ensure there's a min-height so empty states align? 
+       Actually, standardizing spacing is better.
+    */
+}
