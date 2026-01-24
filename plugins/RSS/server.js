@@ -414,6 +414,17 @@ app.get('/api/feed', async (req, res) => {
             }
         }
 
+        // Deduplicate items by title
+        const seen = new Set();
+        const uniqueItems = [];
+        for (const item of allItems) {
+            if (!seen.has(item.title)) {
+                seen.add(item.title);
+                uniqueItems.push(item);
+            }
+        }
+        allItems = uniqueItems;
+
         // Sort by date desc
         allItems.sort((a, b) => new Date(b.date) - new Date(a.date));
 

@@ -1,0 +1,64 @@
+/* Item Actions */
+.preview-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.item-main {
+    flex-grow: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.item-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.action-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.action-btn:hover {
+    background: var(--input-bg-hover);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.action-btn.magnet-btn:hover {
+    color: #ef4444;
+    /* Red for Magnet */
+    border-color: #ef4444;
+}
+
+.action-btn.download-btn:hover {
+    color: var(--success);
+    border-color: var(--success);
+}
+
+.action-btn svg {
+    pointer-events: none;
+}

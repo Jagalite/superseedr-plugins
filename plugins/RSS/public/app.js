@@ -117,16 +117,39 @@ function renderFeeds(feeds) {
         return;
     }
 
-    feeds.forEach(url => {
+    feeds.forEach(feed => {
+        // Handle both string (legacy) and object formats safely
+        const url = feed.url || feed;
+        const enabled = feed.enabled !== false;
+
         const item = document.createElement('div');
         item.className = 'rss-item';
         item.innerHTML = `
-            <div class="url">${url}</div>
+            <div class="item-content">
+                <div class="toggle-switch ${enabled ? 'active' : ''}" onclick="toggleFeed('${url}', ${!enabled})" title="Toggle Feed"></div>
+                <div class="url" title="${url}">${url}</div>
+            </div>
             <button class="delete-btn" onclick="removeFeed('${url}')">&times;</button>
         `;
         rssFeedList.appendChild(item);
     });
 }
+
+window.toggleFeed = async function (url, enabled) {
+    try {
+        await fetch(`${API_URL}/feeds/toggle`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, enabled })
+        });
+        fetchFeeds();
+        // Allow time for server to update cache if needed, or trigger preview refresh
+        setTimeout(fetchFeedPreview, 500);
+    } catch (err) {
+        console.error(err);
+        showToast('Error Toggling Feed');
+    }
+};
 
 async function addFeed(e) {
     e.preventDefault();
@@ -321,18 +344,60 @@ function renderPreview() {
 
         // Check overlap with history (by title or link)
         const isDownloaded = cachedHistory.some(h => h.guid === item.link || h.title === item.title);
+        const isMagnet = item.link.startsWith('magnet:');
+
+        const copyIcon = isMagnet
+            ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>` // Download Icon for Magnet Copy
+            : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`; // Link
+
+        const downloadIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15-4-4 6.75-6.77a7.79 7.79 0 0 1 11 11L13 22l-4-4"/><path d="m11 11 1.71 1.71"/><path d="m17 5 1.71 1.71"/></svg>`; // Magnet Icon for Download
 
         div.innerHTML = `
-            <span>${item.title}</span>
-            ${isDownloaded ? '<span class="badge downloaded">Downloaded</span>' : ''}
+            <div class="item-main">
+                <div class="item-title" title="${item.title}">${item.title}</div>
+                ${isDownloaded ? '<span class="badge downloaded">Downloaded</span>' : ''}
+            </div>
+            <div class="item-actions">
+                <button class="action-btn ${isMagnet ? 'magnet-btn' : ''}" onclick="copyLink('${item.link}')" title="${isMagnet ? 'Copy Magnet' : 'Copy Link'}">${copyIcon}</button>
+                <button class="action-btn download-btn" onclick="downloadItem('${item.link}')" title="Send to Client">${downloadIcon}</button>
+            </div>
         `;
-        div.title = item.title;
         previewList.appendChild(div);
     });
 
     // Run filter immediately
     filterPreview();
 }
+
+window.copyLink = function (link) {
+    navigator.clipboard.writeText(link).then(() => {
+        showToast("Link Copied!");
+    });
+};
+
+window.downloadItem = async function (link) {
+    if (!confirm("Starting download...")) return;
+
+    // Resurrect manualAdd logic or just call endpoint directly
+    try {
+        const res = await fetch(`${API_URL}/manual`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ link })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Download Started');
+            fetchHistory();
+            fetchFeedPreview(); // Update badges
+        } else {
+            showToast('Error: ' + data.error);
+        }
+    } catch (err) {
+        console.error(err);
+        showToast('Download Failed');
+    }
+};
 
 function filterPreview() {
     const pattern = newFilterRegex.value;
