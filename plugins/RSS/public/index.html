@@ -110,8 +110,13 @@
                     <!-- RSS Feeds Moved to Top -->
 
                     <div class="card info-card">
-                        <h3>Current Watch Directory</h3>
-                        <code id="watchDirDisplay">...</code>
+                        <h3>Torrent Output Path</h3>
+                        <form id="settingsForm" class="sidebar-form">
+                            <div class="input-group">
+                                <input type="text" id="watchDirInput" placeholder="/path/to/downloads" required>
+                            </div>
+                            <button type="submit" class="btn secondary small-btn">Save</button>
+                        </form>
                     </div>
 
                 </section>

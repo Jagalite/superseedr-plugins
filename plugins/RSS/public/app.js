@@ -55,18 +55,46 @@ async function init() {
     await fetchFeedPreview(); // Renamed from fetchFeed for clarity
 }
 
+// UI Element for Watch Dir
+const watchDirInput = document.getElementById('watchDirInput');
+const settingsForm = document.getElementById('settingsForm');
+
 async function fetchSettings() {
     try {
         const res = await fetch(`${API_URL}/settings`);
         const data = await res.json();
 
-        watchDirDisplay.textContent = data.watchDir;
+        watchDirInput.value = data.watchDir || '';
         renderFilters(data.filters || []);
 
         updateStatus(true);
     } catch (err) {
         console.error('Failed to fetch settings:', err);
         updateStatus(false);
+    }
+}
+
+async function saveSettings(e) {
+    e.preventDefault();
+    const watchDir = watchDirInput.value.trim();
+    if (!watchDir) return;
+
+    try {
+        const res = await fetch(`${API_URL}/settings`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ watchDir })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast('Watch Directory Saved');
+        } else {
+            showToast('Error Saving Settings');
+        }
+    } catch (err) {
+        console.error(err);
+        showToast('Error Saving Settings');
     }
 }
 
@@ -373,6 +401,7 @@ refreshFeedBtn.addEventListener('click', fetchFeedPreview);
 // --- Initialization ---
 
 manualForm.addEventListener('submit', manualAdd);
+settingsForm.addEventListener('submit', saveSettings);
 addFeedForm.addEventListener('submit', addFeed);
 addFilterForm.addEventListener('submit', addFilter);
 

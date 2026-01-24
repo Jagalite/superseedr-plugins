@@ -19,24 +19,47 @@ function expandHomeDir(filepath) {
     return filepath;
 }
 
-let WATCH_DIR = process.env.WATCH_DIR ? expandHomeDir(process.env.WATCH_DIR) : path.join(os.homedir(), 'Downloads'); // Default for safety
-
-// Ensure Watch Directory Exists
-if (!fs.existsSync(WATCH_DIR)) {
-    console.warn(`[WARN] Watch directory ${WATCH_DIR} does not exist. Attempting to create it...`);
-    try {
-        fs.mkdirSync(WATCH_DIR, { recursive: true });
-    } catch (err) {
-        console.error(`[ERROR] Failed to create watch directory: ${err.message}`);
+function getDefaultWatchDir() {
+    // 1. Env Var has highest priority (if set explicitly by user)
+    if (process.env.WATCH_DIR) {
+        return expandHomeDir(process.env.WATCH_DIR);
     }
-} else {
-    console.log(`[INFO] Watching directory: ${WATCH_DIR}`);
+
+    // 2. OS Specific Defaults
+    const platform = process.platform;
+    const homedir = os.homedir();
+
+    if (platform === 'darwin') { // MacOS
+        return path.join(homedir, 'Library', 'Application Support', 'com.github.jagalite.superseedr', 'watch_files');
+    } else if (platform === 'win32') { // Windows
+        const localAppData = process.env.LOCALAPPDATA || path.join(homedir, 'AppData', 'Local');
+        return path.join(localAppData, 'jagalite', 'superseedr', 'data', 'watch_files');
+    } else { // Linux & Docker
+        return path.join(homedir, '.local', 'share', 'jagalite.superseedr', 'watch_files');
+    }
+}
+
+// Ensure Directory Exists (Helper)
+function ensureDirExists(dirPath) {
+    if (!fs.existsSync(dirPath)) {
+        try {
+            fs.mkdirSync(dirPath, { recursive: true });
+            console.log(`[INFO] Created directory: ${dirPath}`);
+        } catch (err) {
+            console.error(`[ERROR] Failed to create directory ${dirPath}: ${err.message}`);
+        }
+    }
 }
 
 // Simple JSON DB
 function readDB() {
     if (!fs.existsSync(DB_FILE)) {
-        const initialData = { rssFeeds: [], filters: [], downloadHistory: [] };
+        const initialData = {
+            rssFeeds: [],
+            filters: [],
+            downloadHistory: [],
+            watchDir: getDefaultWatchDir()
+        };
         fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
         return initialData;
     }
@@ -44,10 +67,17 @@ function readDB() {
         const data = fs.readFileSync(DB_FILE, 'utf-8');
         let db = JSON.parse(data);
 
+        // Migration: Add watchDir if missing
+        if (!db.watchDir) {
+            console.log("[MIGRATION] Setting default watchDir...");
+            db.watchDir = getDefaultWatchDir();
+            writeDB(db);
+        }
+
         // Migration: Convert old 'rssUrl' to new 'rssFeeds' array
         if (db.rssUrl && !db.rssFeeds) {
             console.log("[MIGRATION] Converting legacy rssUrl to rssFeeds...");
-            db.rssFeeds = [db.rssUrl];
+            db.rssFeeds = [{ url: db.rssUrl, enabled: true }];
             delete db.rssUrl;
             writeDB(db);
         }
@@ -57,10 +87,17 @@ function readDB() {
             writeDB(db);
         }
 
+        // Migration: Convert string feeds to objects
+        if (db.rssFeeds.length > 0 && typeof db.rssFeeds[0] === 'string') {
+            console.log("[MIGRATION] Converting string feeds to objects...");
+            db.rssFeeds = db.rssFeeds.map(url => ({ url, enabled: true }));
+            writeDB(db);
+        }
+
         // Migration: Convert old 'filterRegex' to new 'filters' array
         if (db.filterRegex && !db.filters) {
             console.log("[MIGRATION] Converting legacy regex to filter...");
-            db.filters = [{ name: "Default", regex: db.filterRegex }];
+            db.filters = [{ name: "Default", regex: db.filterRegex, enabled: true }];
             delete db.filterRegex;
             writeDB(db);
         }
@@ -70,10 +107,20 @@ function readDB() {
             writeDB(db);
         }
 
+        // Ensure all filters have enabled flag
+        let filtersChanged = false;
+        db.filters.forEach(f => {
+            if (f.enabled === undefined) {
+                f.enabled = true;
+                filtersChanged = true;
+            }
+        });
+        if (filtersChanged) writeDB(db);
+
         return db;
     } catch (err) {
         console.error("Error reading DB:", err);
-        return { rssFeeds: [], filters: [], downloadHistory: [] };
+        return { rssFeeds: [], filters: [], downloadHistory: [], watchDir: getDefaultWatchDir() };
     }
 }
 
@@ -81,31 +128,51 @@ function writeDB(data) {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 }
 
-// File Writing Helper
+// File Writing Helper (Atomic Write Pattern)
 async function saveToWatchDir(item) {
+    const db = readDB();
+    const watchDir = db.watchDir;
+
+    ensureDirExists(watchDir);
+
     const safeTitle = item.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
-    // Check if it's a magnet link
+    // 1. Handle Magnet Links
     if (item.link && item.link.startsWith('magnet:?')) {
-        const filePath = path.join(WATCH_DIR, `${safeTitle}.magnet`);
-        fs.writeFileSync(filePath, item.link);
-        console.log(`[SUCCESS] Saved magnet: ${filePath}`);
-        return true;
+        const finalPath = path.join(watchDir, `${safeTitle}.magnet`);
+        const tempPath = finalPath + '.tmp';
+
+        try {
+            fs.writeFileSync(tempPath, item.link);
+            fs.renameSync(tempPath, finalPath); // Atomic Rename
+            console.log(`[SUCCESS] Saved magnet: ${finalPath}`);
+            return true;
+        } catch (err) {
+            console.error(`[ERROR] Failed to save magnet: ${err.message}`);
+            if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+            return false;
+        }
     }
-    // Check if it's a torrent file URL
-    else if (item.link && item.link.endsWith('.torrent')) {
+    // 2. Handle Torrent Files (URL ends with .torrent OR /torrent)
+    else if (item.link && (item.link.endsWith('.torrent') || item.link.endsWith('/torrent'))) {
+        const finalPath = path.join(watchDir, `${safeTitle}.torrent`);
+        const tempPath = finalPath + '.tmp';
+
         try {
             const response = await axios({
                 url: item.link,
                 method: 'GET',
                 responseType: 'arraybuffer'
             });
-            const filePath = path.join(WATCH_DIR, `${safeTitle}.torrent`);
-            fs.writeFileSync(filePath, response.data);
-            console.log(`[SUCCESS] Downloaded torrent: ${filePath}`);
+            const buffer = Buffer.from(response.data);
+
+            fs.writeFileSync(tempPath, buffer);
+            fs.renameSync(tempPath, finalPath); // Atomic Rename
+            console.log(`[SUCCESS] Downloaded torrent: ${finalPath}`);
             return true;
         } catch (err) {
-            console.error(`[ERROR] Failed to download torrent: ${err.message}`);
+            console.error(`[ERROR] Failed to download torrent from ${item.link}: ${err.message}`);
+            if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
             return false;
         }
     }
@@ -122,27 +189,30 @@ async function checkRSS() {
     console.log("[WORKER] Checking RSS feeds...");
     const db = readDB();
 
-    if (!db.rssFeeds || db.rssFeeds.length === 0) {
-        console.log("[WORKER] No RSS feeds configured.");
+    const enabledFeeds = db.rssFeeds.filter(f => f.enabled);
+
+    if (enabledFeeds.length === 0) {
+        console.log("[WORKER] No enabled RSS feeds.");
         return;
     }
 
     let allItems = [];
 
-    // Fetch all feeds
-    for (const url of db.rssFeeds) {
+    // Fetch all enabled feeds
+    for (const feedObj of enabledFeeds) {
         try {
-            console.log(`[WORKER] Fetching ${url}...`);
-            const feed = await parser.parseURL(url);
+            console.log(`[WORKER] Fetching ${feedObj.url}...`);
+            const feed = await parser.parseURL(feedObj.url);
             // Attach source URL to item just in case we need it later
-            feed.items.forEach(item => item._source = url);
+            feed.items.forEach(item => item._source = feedObj.url);
             allItems = allItems.concat(feed.items);
         } catch (err) {
-            console.error(`[WORKER] Failed to fetch ${url}: ${err.message}`);
+            console.error(`[WORKER] Failed to fetch ${feedObj.url}: ${err.message}`);
         }
     }
 
     let newItemsCount = 0;
+    const enabledFilters = db.filters.filter(f => f.enabled);
 
     for (const item of allItems) {
         // Check if already downloaded
@@ -152,10 +222,10 @@ async function checkRSS() {
         // Check against Filters
         let matched = false;
 
-        if (db.filters.length === 0) {
-            // If no filters, do nothing (User must add a filter)
+        if (enabledFilters.length === 0) {
+            // If no filters, do nothing
         } else {
-            for (const filter of db.filters) {
+            for (const filter of enabledFilters) {
                 try {
                     const regex = new RegExp(filter.regex, 'i');
                     if (regex.test(item.title)) {
@@ -211,21 +281,20 @@ app.get('/api/settings', (req, res) => {
     res.json({
         rssFeeds: db.rssFeeds, // Array
         filters: db.filters,
-        watchDir: WATCH_DIR
+        watchDir: db.watchDir
     });
 });
 
 app.post('/api/settings', (req, res) => {
-    // This might be used to override all settings, but let's encourage specific endpoints? 
-    // Actually, keeping it for bulk update is fine, but we'll focus on add/remove feed likely.
-    // Let's support full replace for now for simplicity of the "Save" button if needed, 
-    // OR we can add specific endpoints for feeds like /api/feeds.
-
-    // Changing to /api/feeds endpoints below. 
-    // But keeping this compatible with frontend full-save if needed. 
-    // For now, let's assume we want granular control or full save.
-    // Let's implement /api/feeds endpoints.
-    res.status(404).json({ error: "Use specific endpoints" });
+    const { watchDir } = req.body;
+    if (watchDir) {
+        const db = readDB();
+        db.watchDir = expandHomeDir(watchDir);
+        writeDB(db);
+        res.json({ success: true, message: "Settings saved" });
+    } else {
+        res.status(404).json({ error: "Use specific endpoints for feeds/filters" });
+    }
 });
 
 app.get('/api/feeds', (req, res) => {
@@ -238,8 +307,8 @@ app.post('/api/feeds', (req, res) => {
     if (!url) return res.status(400).json({ error: "URL required" });
 
     const db = readDB();
-    if (!db.rssFeeds.includes(url)) {
-        db.rssFeeds.push(url);
+    if (!db.rssFeeds.some(f => f.url === url)) {
+        db.rssFeeds.push({ url, enabled: true });
         writeDB(db);
         checkRSS(); // Trigger check
     }
@@ -249,9 +318,22 @@ app.post('/api/feeds', (req, res) => {
 app.delete('/api/feeds', (req, res) => {
     const { url } = req.body;
     const db = readDB();
-    db.rssFeeds = db.rssFeeds.filter(f => f !== url);
+    db.rssFeeds = db.rssFeeds.filter(f => f.url !== url);
     writeDB(db);
     res.json({ success: true, message: "Feed removed" });
+});
+
+app.post('/api/feeds/toggle', (req, res) => {
+    const { url, enabled } = req.body;
+    const db = readDB();
+    const feed = db.rssFeeds.find(f => f.url === url);
+    if (feed) {
+        feed.enabled = !!enabled;
+        writeDB(db);
+        res.json({ success: true, message: "Feed updated" });
+    } else {
+        res.status(404).json({ error: "Feed not found" });
+    }
 });
 
 app.post('/api/filters', (req, res) => {
@@ -271,7 +353,7 @@ app.post('/api/filters', (req, res) => {
         return res.status(400).json({ error: "Invalid Regex" });
     }
 
-    db.filters.push({ name, regex });
+    db.filters.push({ name, regex, enabled: true });
     writeDB(db);
 
     checkRSS(); // Trigger check with new filter
@@ -291,27 +373,43 @@ app.delete('/api/filters/:name', (req, res) => {
     res.json({ success: true, message: "Filter deleted" });
 });
 
+app.post('/api/filters/toggle', (req, res) => {
+    const { name, enabled } = req.body;
+    const db = readDB();
+    const filter = db.filters.find(f => f.name === name);
+    if (filter) {
+        filter.enabled = !!enabled;
+        writeDB(db);
+        res.json({ success: true, message: "Filter updated" });
+    } else {
+        res.status(404).json({ error: "Filter not found" });
+    }
+});
+
 app.get('/api/feed', async (req, res) => {
     const db = readDB();
-    if (!db.rssFeeds || db.rssFeeds.length === 0) return res.json({ items: [] });
+    const enabledFeeds = db.rssFeeds ? db.rssFeeds.filter(f => f.enabled) : [];
+
+    if (enabledFeeds.length === 0) return res.json({ items: [] });
 
     let allItems = [];
 
     try {
-        for (const url of db.rssFeeds) {
+        for (const feedObj of enabledFeeds) {
             try {
-                const feed = await parser.parseURL(url);
+                const feed = await parser.parseURL(feedObj.url);
                 const items = feed.items.map(item => ({
                     title: item.title,
                     link: item.link,
                     date: item.isoDate || item.pubDate,
-                    source: url
-                })).slice(0, 300); // Limit per feed (Increased to 300)
+                    source: feedObj.url
+                }));
 
-                console.log(`[DEBUG] Fetched ${items.length} items from ${url}. First: "${items[0]?.title}"`);
-                allItems = allItems.concat(items);
+                // Limit per feed (300 to ensure we find items)
+                const limitedItems = items.slice(0, 300);
+                allItems = allItems.concat(limitedItems);
             } catch (e) {
-                console.error(`Error fetching ${url} for preview:`, e.message);
+                console.error(`Error fetching ${feedObj.url} for preview:`, e.message);
                 // Continue to next feed
             }
         }
@@ -319,8 +417,8 @@ app.get('/api/feed', async (req, res) => {
         // Sort by date desc
         allItems.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        console.log(`[DEBUG] Sending ${allItems.length} total items to frontend.`);
-        res.json({ items: allItems.slice(0, 500) }); // Return top 500 aggregated
+        // Return top 500 aggregated
+        res.json({ items: allItems.slice(0, 500) });
     } catch (err) {
         console.error("Error fetching feed for preview:", err);
         res.status(500).json({ error: "Failed to fetch feeds" });
@@ -362,5 +460,6 @@ app.post('/api/manual', async (req, res) => {
 // Start Server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
-    console.log(`Watch Directory: ${WATCH_DIR}`);
+    const db = readDB();
+    console.log(`Current Watch Directory: ${db.watchDir}`);
 });
