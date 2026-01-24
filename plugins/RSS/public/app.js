@@ -22,6 +22,7 @@ const historyTableBody = document.querySelector('#historyTable tbody');
 const statusBadge = document.getElementById('statusBadge');
 const refreshBtn = document.getElementById('refreshBtn');
 const toast = document.getElementById('toast');
+const syncTimer = document.getElementById('syncTimer');
 
 // --- Helper Functions ---
 
@@ -46,9 +47,44 @@ function updateStatus(connected) {
     }
 }
 
+// --- Sync Timer ---
+let nextSyncTime = 0;
+
+async function fetchSyncStatus() {
+    try {
+        const res = await fetch(`${API_URL}/status`);
+        const data = await res.json();
+        nextSyncTime = data.lastSync + data.interval;
+    } catch (err) {
+        console.error('Failed to fetch sync status:', err);
+    }
+}
+
+function updateSyncTimer() {
+    if (!nextSyncTime) return;
+
+    const now = Date.now();
+    const diff = nextSyncTime - now;
+
+    if (diff <= 0) {
+        syncTimer.textContent = 'Syncing...';
+        // Give it a few seconds then re-fetch
+        if (diff < -5000) fetchSyncStatus();
+        return;
+    }
+
+    const minutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    syncTimer.textContent = `Next sync: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+setInterval(updateSyncTimer, 1000);
+setInterval(fetchSyncStatus, 60000); // Re-sync with server every minute
+
 // --- Data Fetching ---
 
 async function init() {
+    await fetchSyncStatus();
     await fetchSettings(); // Gets WatchDir and Filters
     await fetchFeeds();
     await fetchHistory();

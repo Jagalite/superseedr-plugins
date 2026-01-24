@@ -182,10 +182,12 @@ async function saveToWatchDir(item) {
 }
 
 // --- 2. Worker Logic ---
+let lastSync = Date.now();
 
 const parser = new Parser();
 
 async function checkRSS() {
+    lastSync = Date.now();
     console.log("[WORKER] Checking RSS feeds...");
     const db = readDB();
 
@@ -276,6 +278,13 @@ app.use(express.static('public'));
 app.use(bodyParser.json());
 
 // API Routes
+app.get('/api/status', (req, res) => {
+    res.json({
+        lastSync,
+        interval: 15 * 60 * 1000
+    });
+});
+
 app.get('/api/settings', (req, res) => {
     const db = readDB();
     res.json({
