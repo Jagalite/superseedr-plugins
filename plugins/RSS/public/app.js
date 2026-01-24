@@ -309,7 +309,23 @@ async function fetchHistory() {
     }
 }
 
-// ... (renderHistory is fine)
+function renderHistory(history) {
+    historyTableBody.innerHTML = '';
+    if (history.length === 0) {
+        historyTableBody.innerHTML = '<tr><td colspan="2" class="empty-state">No history yet.</td></tr>';
+        return;
+    }
+
+    history.forEach(item => {
+        const row = document.createElement('tr');
+        const date = new Date(item.date).toLocaleString();
+        row.innerHTML = `
+            <td><div class="item-title" title="${item.title}">${item.title}</div></td>
+            <td><span class="date-tag">${date}</span></td>
+        `;
+        historyTableBody.appendChild(row);
+    });
+}
 
 // --- Live Feed Preview ---
 
@@ -374,7 +390,7 @@ window.copyLink = function (link) {
 };
 
 window.downloadItem = async function (link) {
-    if (!confirm("Starting download...")) return;
+    showToast("Starting download...");
 
     // Resurrect manualAdd logic or just call endpoint directly
     try {
