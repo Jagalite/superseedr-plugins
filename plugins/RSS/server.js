@@ -4,7 +4,6 @@ const axios = require('axios');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const bodyParser = require('body-parser');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -276,7 +275,7 @@ setTimeout(checkRSS, 5000);
 // --- 3. Express Server ---
 
 app.use(express.static('public'));
-app.use(bodyParser.json());
+app.use(express.json());
 
 // API Routes
 app.get('/api/status', (req, res) => {

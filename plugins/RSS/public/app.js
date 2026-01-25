@@ -16,7 +16,6 @@ const refreshFeedBtn = document.getElementById('refreshFeedBtn');
 const previewList = document.getElementById('previewList');
 const matchCountDisplay = document.getElementById('matchCount');
 
-const watchDirDisplay = document.getElementById('watchDirDisplay');
 const historyTableBody = document.querySelector('#historyTable tbody');
 const statusBadge = document.getElementById('statusBadge');
 const refreshBtn = document.getElementById('refreshBtn');
