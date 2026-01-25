@@ -21,6 +21,7 @@ const statusBadge = document.getElementById('statusBadge');
 const refreshBtn = document.getElementById('refreshBtn');
 const toast = document.getElementById('toast');
 const syncTimer = document.getElementById('syncTimer');
+const syncNowBtn = document.getElementById('syncNowBtn');
 
 // --- Helper Functions ---
 
@@ -525,6 +526,30 @@ function filterPreview() {
 
 newFilterRegex.addEventListener('input', filterPreview);
 refreshFeedBtn.addEventListener('click', fetchFeedPreview);
+
+syncNowBtn.addEventListener('click', async () => {
+    syncNowBtn.disabled = true;
+    syncNowBtn.textContent = 'Syncing...';
+    showToast("Triggering RSS Sync...");
+
+    try {
+        const res = await fetch(`${API_URL}/sync`, { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast("Sync Complete!");
+            await fetchSyncStatus();
+            await fetchHistory();
+            await fetchFeedPreview();
+        }
+    } catch (err) {
+        console.error(err);
+        showToast("Sync Failed");
+    } finally {
+        syncNowBtn.disabled = false;
+        syncNowBtn.textContent = 'Sync Now';
+    }
+});
 
 // --- Initialization ---
 

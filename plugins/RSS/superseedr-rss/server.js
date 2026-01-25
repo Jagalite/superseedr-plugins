@@ -285,6 +285,12 @@ app.get('/api/status', (req, res) => {
     });
 });
 
+app.post('/api/sync', async (req, res) => {
+    console.log("[API] Manual sync requested.");
+    await checkRSS();
+    res.json({ success: true, message: "Sync started" });
+});
+
 app.get('/api/settings', (req, res) => {
     const db = readDB();
     res.json({
