@@ -63,8 +63,13 @@ Automate downloads by monitoring RSS feeds and matching titles against custom re
 ```yaml
   superseedr-rss:
     build: ./plugins/RSS/superseedr-rss
+    ports:
+      - "3000:3000"
     environment:
+      # Map the internal container path to the environment variable
       - WATCH_DIR=/superseedr-watch
+      - DATA_DIR=/data
+      - PORT=3000
     volumes:
       - superseedr-watch:/superseedr-watch
       - rss-plugin-data:/data

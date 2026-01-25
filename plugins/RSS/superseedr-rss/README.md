@@ -30,6 +30,7 @@ Use the command matching your operating system to launch the plugin immediately.
 docker run -d \
   --name superseedr-rss \
   --restart unless-stopped \
+  -p 3000:3000 \
   -v "$HOME/Library/Application Support/com.github.jagalite.superseedr/watch_files:/superseedr-watch" \
   superseedr/rss-plugin
 ```
@@ -40,6 +41,7 @@ docker run -d \
   --name superseedr-rss \
   --user $(id -u):$(id -g) \
   --restart unless-stopped \
+  -p 3000:3000 \
   -v "$HOME/.local/share/jagalite.superseedr/watch_files:/superseedr-watch" \
   superseedr/rss-plugin
 ```
@@ -49,6 +51,7 @@ docker run -d \
 docker run -d `
   --name superseedr-rss `
   --restart unless-stopped `
+  -p 3000:3000 `
   -v "$env:LOCALAPPDATA\jagalite\superseedr\data\watch_files:/superseedr-watch" `
   superseedr/rss-plugin
 ```
@@ -72,6 +75,7 @@ services:
       # Map the internal container path to the environment variable
       - WATCH_DIR=/superseedr-watch
       - DATA_DIR=/data
+      - PORT=3000
     volumes:
       # Mount the shared watch volume
       - superseedr-watch:/superseedr-watch
