@@ -60,24 +60,22 @@
                                 <div class="input-group">
                                     <input type="url" id="newRssUrl" placeholder="Add Feed URL..." required>
                                 </div>
-                                <button type="submit" class="btn secondary small-btn">Add Feed</button>
+                                <button type="submit" class="btn primary small-btn">Add Feed</button>
                             </form>
                         </div>
 
                         <!-- Right: Filters -->
                         <div class="config-column">
                             <h3>Content Filters</h3>
-                            <div class="filter-list" id="filterList">
+                            <div class="filter-list small-list" id="filterList">
                                 <!-- Populated by JS -->
                             </div>
-                            <form id="addFilterForm" class="filter-form">
-                                <div class="filter-inputs">
-                                    <input type="text" id="newFilterName" placeholder="Name" required
-                                        style="width: 30%">
-                                    <input type="text" id="newFilterRegex" placeholder="Regex" required
-                                        style="width: 70%">
+                            <form id="addFilterForm" class="sidebar-form">
+                                <div class="input-group">
+                                    <input type="text" id="newFilterRegex"
+                                        placeholder="Regex Pattern (e.g. 1080p|2160p)" required>
                                 </div>
-                                <button type="submit" class="btn primary small-btn">Add</button>
+                                <button type="submit" class="btn primary small-btn">Add Filter</button>
                             </form>
                         </div>
                     </div>

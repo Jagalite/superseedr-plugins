@@ -346,13 +346,13 @@ app.post('/api/feeds/toggle', (req, res) => {
 });
 
 app.post('/api/filters', (req, res) => {
-    const { name, regex } = req.body;
-    if (!name || !regex) return res.status(400).json({ error: "Name and Regex are required" });
+    const { regex } = req.body;
+    if (!regex) return res.status(400).json({ error: "Regex is required" });
 
     const db = readDB();
-    // Check for duplicate name
-    if (db.filters.some(f => f.name === name)) {
-        return res.status(400).json({ error: "Filter with this name already exists" });
+    // Check for duplicate regex
+    if (db.filters.some(f => f.regex === regex)) {
+        return res.status(400).json({ error: "Filter with this pattern already exists" });
     }
 
     // Validate Regex
@@ -362,17 +362,18 @@ app.post('/api/filters', (req, res) => {
         return res.status(400).json({ error: "Invalid Regex" });
     }
 
-    db.filters.push({ name, regex, enabled: true });
+    db.filters.push({ name: regex, regex, enabled: true });
     writeDB(db);
 
     checkRSS(); // Trigger check with new filter
     res.json({ success: true, message: "Filter added" });
 });
 
-app.delete('/api/filters/:name', (req, res) => {
+app.delete('/api/filters/:regex', (req, res) => {
     const db = readDB();
+    const regexToDelete = decodeURIComponent(req.params.regex);
     const originalLength = db.filters.length;
-    db.filters = db.filters.filter(f => f.name !== req.params.name);
+    db.filters = db.filters.filter(f => f.regex !== regexToDelete);
 
     if (db.filters.length === originalLength) {
         return res.status(404).json({ error: "Filter not found" });
@@ -383,9 +384,9 @@ app.delete('/api/filters/:name', (req, res) => {
 });
 
 app.post('/api/filters/toggle', (req, res) => {
-    const { name, enabled } = req.body;
+    const { regex, enabled } = req.body;
     const db = readDB();
-    const filter = db.filters.find(f => f.name === name);
+    const filter = db.filters.find(f => f.regex === regex);
     if (filter) {
         filter.enabled = !!enabled;
         writeDB(db);

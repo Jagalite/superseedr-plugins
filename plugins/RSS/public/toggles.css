@@ -16,12 +16,19 @@
     }
 }
 
+.config-column {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 .config-column h3 {
     font-size: 0.85rem;
     text-transform: uppercase;
     color: var(--text-secondary);
     margin-bottom: 0.75rem;
     letter-spacing: 0.05em;
+    flex-shrink: 0;
 }
 
 /* Toggles */

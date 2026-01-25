@@ -9,7 +9,6 @@ const addFeedForm = document.getElementById('addFeedForm');
 const newRssUrl = document.getElementById('newRssUrl');
 
 const addFilterForm = document.getElementById('addFilterForm');
-const newFilterName = document.getElementById('newFilterName');
 const newFilterRegex = document.getElementById('newFilterRegex');
 const filterList = document.getElementById('filterList');
 
@@ -149,7 +148,7 @@ async function fetchFeeds() {
 function renderFeeds(feeds) {
     rssFeedList.innerHTML = '';
     if (feeds.length === 0) {
-        rssFeedList.innerHTML = '<div style="color:var(--text-secondary); font-style:italic; padding:0.5rem;">No feeds configured.</div>';
+        rssFeedList.innerHTML = '<div class="empty-list-message">No feeds configured.</div>';
         return;
     }
 
@@ -238,7 +237,7 @@ window.removeFeed = async function (url) {
 function renderFilters(filters) {
     filterList.innerHTML = '';
     if (filters.length === 0) {
-        filterList.innerHTML = '<p style="color:var(--text-secondary); font-size:0.85rem; padding:0.5rem;">No filters active. Nothing will be downloaded.</p>';
+        filterList.innerHTML = '<div class="empty-list-message">No filters active. Nothing will be downloaded.</div>';
         return;
     }
 
@@ -247,10 +246,9 @@ function renderFilters(filters) {
         item.className = 'filter-item';
         item.innerHTML = `
             <div class="filter-info">
-                <h4>${filter.name}</h4>
                 <code>${filter.regex}</code>
             </div>
-            <button class="delete-btn" onclick="deleteFilter('${filter.name}')" title="Delete">&times;</button>
+            <button class="delete-btn" onclick="deleteFilter('${encodeURIComponent(filter.regex)}')" title="Delete">&times;</button>
         `;
         filterList.appendChild(item);
     });
@@ -258,22 +256,20 @@ function renderFilters(filters) {
 
 async function addFilter(e) {
     e.preventDefault();
-    const name = newFilterName.value.trim();
     const regex = newFilterRegex.value.trim();
 
-    if (!name || !regex) return;
+    if (!regex) return;
 
     try {
         const res = await fetch(`${API_URL}/filters`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, regex })
+            body: JSON.stringify({ regex })
         });
         const data = await res.json();
 
         if (data.success) {
             showToast('Filter Added');
-            newFilterName.value = '';
             newFilterRegex.value = '';
             fetchSettings(); // Re-fetch to update list
         } else {
@@ -286,11 +282,11 @@ async function addFilter(e) {
 }
 
 // Global scope for onclick
-window.deleteFilter = async function (name) {
-    if (!confirm(`Delete filter "${name}"?`)) return;
+window.deleteFilter = async function (regex) {
+    if (!confirm(`Delete filter pattern: ${regex}?`)) return;
 
     try {
-        const res = await fetch(`${API_URL}/filters/${encodeURIComponent(name)}`, {
+        const res = await fetch(`${API_URL}/filters/${encodeURIComponent(regex)}`, {
             method: 'DELETE'
         });
         const data = await res.json();
