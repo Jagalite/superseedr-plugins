@@ -23,7 +23,14 @@ An RSS automation sidecar for the Superseedr BitTorrent client. This plugin moni
 The UI will be available at `http://localhost:3000`.
 
 ### Quick Start (Docker Run)
-Use the command matching your operating system to launch the plugin immediately. This will mount your local Superseedr watch directory into the container.
+
+**1. Build the image locally:**
+From inside the `plugins/RSS/superseedr-rss` directory:
+```bash
+docker build -t superseedr-rss .
+```
+
+**2. Launch the plugin matching your OS:**
 
 **🍎 macOS**
 ```bash
@@ -32,7 +39,7 @@ docker run -d \
   --restart unless-stopped \
   -p 3000:3000 \
   -v "$HOME/Library/Application Support/com.github.jagalite.superseedr/watch_files:/superseedr-watch" \
-  superseedr/rss-plugin
+  superseedr-rss
 ```
 
 **🐧 Linux**
@@ -43,7 +50,7 @@ docker run -d \
   --restart unless-stopped \
   -p 3000:3000 \
   -v "$HOME/.local/share/jagalite.superseedr/watch_files:/superseedr-watch" \
-  superseedr/rss-plugin
+  superseedr-rss
 ```
 
 **VX Windows (PowerShell)**
@@ -53,7 +60,7 @@ docker run -d `
   --restart unless-stopped `
   -p 3000:3000 `
   -v "$env:LOCALAPPDATA\jagalite\superseedr\data\watch_files:/superseedr-watch" `
-  superseedr/rss-plugin
+  superseedr-rss
 ```
 
 ## Persistent Setup (Docker Compose)
