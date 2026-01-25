@@ -396,8 +396,8 @@ function renderPreview() {
         const isDownloaded = cachedHistory.some(h => h.guid === item.link || h.title === item.title);
         const isMagnet = item.link.startsWith('magnet:');
 
-        const filterIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>`; // Filter Icon
-        const copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`; // Chain/Link Icon
+        const regexIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="11" r="5"></circle><path d="M17 3v10"></path><path d="m12.7 5.5 8.6 5"></path><path d="m12.7 10.5 8.6-5"></path></svg>`; // Regex Icon
+        const copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`; // Stacked Pages Icon
         const downloadIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>`; // Download Icon
 
         div.innerHTML = `
@@ -406,7 +406,7 @@ function renderPreview() {
                 ${isDownloaded ? '<span class="badge downloaded">Downloaded</span>' : ''}
             </div>
             <div class="item-actions">
-                <button class="action-btn" onclick="copyTitleToRegex('${item.title.replace(/'/g, "\\'")}')" title="Use as Filter">${filterIcon}</button>
+                <button class="action-btn" onclick="copyTitleToRegex('${item.title.replace(/'/g, "\\'")}')" title="Use as Filter">${regexIcon}</button>
                 <button class="action-btn ${isMagnet ? 'magnet-btn' : ''}" onclick="copyLink('${item.link}')" title="${isMagnet ? 'Copy Magnet' : 'Copy Link'}">${copyIcon}</button>
                 <button class="action-btn download-btn" onclick="downloadItem('${item.link}')" title="Send to Client">${downloadIcon}</button>
             </div>
@@ -419,7 +419,9 @@ function renderPreview() {
 }
 
 window.copyTitleToRegex = function (title) {
-    newFilterRegex.value = title;
+    // Escape special regex characters so the literal title matches
+    const escaped = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    newFilterRegex.value = escaped;
     newFilterRegex.focus();
     filterPreview(); // Update highlighting immediately
     showToast("Pattern set to search");
