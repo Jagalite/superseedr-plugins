@@ -22,3 +22,17 @@ services:
       # Tell the plugin where to drop files
       - WATCH_DIR=/superseedr_data/watch_files
 ```
+## Plugins
+
+### [RSS Plugin](./plugins/RSS)
+Automate downloads using RSS feeds and regex patterns.
+
+```yaml
+  superseedr-rss:
+    build: ./plugins/RSS
+    environment:
+      - WATCH_DIR=/superseedr-watch
+    volumes:
+      - superseedr-watch:/superseedr-watch
+      - rss-plugin-data:/data
+```

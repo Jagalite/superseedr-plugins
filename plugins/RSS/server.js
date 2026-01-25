@@ -8,7 +8,8 @@ const bodyParser = require('body-parser');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DB_FILE = path.join(__dirname, 'db.json');
+const DATA_DIR = process.env.DATA_DIR || __dirname;
+const DB_FILE = path.join(DATA_DIR, 'db.json');
 
 // --- 1. Configuration & Helper Functions ---
 
@@ -131,7 +132,7 @@ function writeDB(data) {
 // File Writing Helper (Atomic Write Pattern)
 async function saveToWatchDir(item) {
     const db = readDB();
-    const watchDir = db.watchDir;
+    const watchDir = process.env.WATCH_DIR || db.watchDir;
 
     ensureDirExists(watchDir);
 
@@ -290,7 +291,7 @@ app.get('/api/settings', (req, res) => {
     res.json({
         rssFeeds: db.rssFeeds, // Array
         filters: db.filters,
-        watchDir: db.watchDir
+        watchDir: process.env.WATCH_DIR || db.watchDir
     });
 });
 
