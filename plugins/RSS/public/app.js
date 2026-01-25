@@ -100,7 +100,9 @@ async function fetchSettings() {
         const data = await res.json();
 
         watchDirInput.value = data.watchDir || '';
-        renderFilters(data.filters || []);
+        cachedFilters = data.filters || [];
+        renderFilters(cachedFilters);
+        if (cachedFeedItems.length > 0) filterPreview();
 
         updateStatus(true);
     } catch (err) {
@@ -326,6 +328,7 @@ async function manualAdd(e) {
 // --- Global State ---
 let cachedFeedItems = [];
 let cachedHistory = []; // Store history for cross-referencing
+let cachedFilters = [];
 
 // ... (fetchHistory update)
 
@@ -446,43 +449,50 @@ window.downloadItem = async function (link) {
 };
 
 function filterPreview() {
-    const pattern = newFilterRegex.value;
     const items = Array.from(previewList.querySelectorAll('.preview-item'));
+    const searchPattern = newFilterRegex.value.trim();
     let matchCount = 0;
-    let regex = null;
-
-    // Try to compile regex
-    if (pattern) {
-        try {
-            regex = new RegExp(pattern, 'i');
-        } catch (e) {
-            // Invalid regex, maybe show visual feedback?
-        }
+    let searchRegex = null;
+    if (searchPattern) {
+        try { searchRegex = new RegExp(searchPattern, 'i'); } catch (e) { }
     }
+
+    // Prepare regexes for all cached filters
+    const activeFilterRegexes = cachedFilters
+        .map(f => {
+            try { return new RegExp(f.regex, 'i'); } catch (e) { return null; }
+        })
+        .filter(r => r !== null);
 
     items.forEach(el => {
         if (el.classList.contains('placeholder')) return;
 
-        // Reset display and highlight first
+        const title = el.querySelector('.item-title')?.textContent || '';
+
+        // Reset state
         el.style.display = '';
         el.classList.remove('highlight', 'dim');
 
-        if (!pattern) {
-            // No pattern: just show everything normally, no sorting needed here 
-            // (or revert to original order? For simplicity, we just leave them)
-            matchCount++;
-        } else if (regex && regex.test(el.textContent)) {
+        const matchesSearch = searchRegex ? searchRegex.test(title) : false;
+        const matchesSavedFilter = activeFilterRegexes.some(r => r.test(title));
+
+        if (matchesSearch || matchesSavedFilter) {
             el.classList.add('highlight');
-            el.dataset.match = "1"; // Mark as match for sorting
+            el.dataset.match = "1";
             matchCount++;
-        } else {
+        } else if (searchPattern || activeFilterRegexes.length > 0) {
             el.classList.add('dim');
-            el.dataset.match = "0"; // Mark as no-match
+            el.dataset.match = "0";
+        } else {
+            // No search and no filters: everything is normal
+            el.dataset.match = "0";
+            matchCount++;
         }
     });
 
     // Sort items: Matches first
-    if (pattern) {
+    const hasActiveFilters = searchPattern || activeFilterRegexes.length > 0;
+    if (hasActiveFilters) {
         items.sort((a, b) => {
             if (a.classList.contains('placeholder')) return -1;
             if (b.classList.contains('placeholder')) return 1;
@@ -499,8 +509,6 @@ function filterPreview() {
         const fragment = document.createDocumentFragment();
         items.forEach(el => fragment.appendChild(el));
         previewList.appendChild(fragment);
-    } else {
-        matchCount = items.length;
     }
 
     matchCountDisplay.textContent = `${matchCount} potential matches`;
