@@ -1,0 +1,94 @@
+# --- Node.js ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm
+package-lock.json
+!plugins/**/package-lock.json
+
+# --- Superseedr Config ---
+# Ignore the local environment file
+.env
+
+# --- local temp---
+tmp
+*.tmp
+
+# --- macOS ---
+.DS_Store
+
+# --- Editor Specific ---
+# Ignore VSCode workspace settings
+.vscode/
+
+# --- Rust / Cargo ---
+# Ignore build artifacts
+/target/
+rust-toolchain
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- Go ---
+/bin/
+/vendor/
+go.work
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# --- VPN Credentials ---
+# Block these sensitive filenames ANYWHERE they appear
+.gluetun.env
+
+# BUT, explicitly UN-ignore (with '!') the template files
+!.gluetun.env.example
+
+# --- Safety Net ---
+# Ignore common torrent/media files ANYWHERE in the repo
+# in case of accidental downloads to the project root.
+*.mkv
+*.mp4
+*.avi
+*.mov
+*.flv
+*.iso
+*.img
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+*.nfo
