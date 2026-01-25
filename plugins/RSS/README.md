@@ -22,7 +22,38 @@ An RSS automation sidecar for the Superseedr BitTorrent client. This plugin moni
 
 The UI will be available at `http://localhost:3000`.
 
-## Docker Deployment (Sidecar Container)
+### Quick Start (Docker Run)
+Use the command matching your operating system to launch the plugin immediately. This will mount your local Superseedr watch directory into the container.
+
+**🍎 macOS**
+```bash
+docker run -d \
+  --name superseedr-rss \
+  --restart unless-stopped \
+  -v "$HOME/Library/Application Support/com.github.jagalite.superseedr/watch_files:/superseedr-watch" \
+  superseedr/rss-plugin
+```
+
+**🐧 Linux**
+```bash
+docker run -d \
+  --name superseedr-rss \
+  --user $(id -u):$(id -g) \
+  --restart unless-stopped \
+  -v "$HOME/.local/share/jagalite.superseedr/watch_files:/superseedr-watch" \
+  superseedr/rss-plugin
+```
+
+**VX Windows (PowerShell)**
+```powershell
+docker run -d `
+  --name superseedr-rss `
+  --restart unless-stopped `
+  -v "$env:LOCALAPPDATA\jagalite\superseedr\data\watch_files:/superseedr-watch" `
+  superseedr/rss-plugin
+```
+
+## Persistent Setup (Docker Compose)
 
 This plugin is designed to run as a **sidecar** to the main `superseedr` service. It should share the `superseedr-watch` volume and use the same VPN network (if applicable).
 
@@ -62,21 +93,6 @@ Regardless of your host operating system (Linux, Windows, or macOS), the Docker 
 1. The `WATCH_DIR` in the environment variable must match the **container side** of your volume mount (e.g., `/superseedr-watch`).
 2. Superseedr must also be configured to watch that same shared volume.
 
-### Hybrid Mode (Local Superseedr + Container Plugin)
-
-If you are running Superseedr directly on your laptop (non-Docker) but want to run the RSS plugin in a container, you can link them by mounting your local watch folder into the container.
-
-#### For macOS users:
-```yaml
-  superseedr-rss:
-    build: ./plugins/RSS
-    environment:
-      - WATCH_DIR=/superseedr-watch
-    volumes:
-      # Map your LOCAL macOS path to the container
-      - "~/Library/Application Support/com.github.jagalite.superseedr/watch_files:/superseedr-watch"
-      - rss-plugin-data:/data
-```
 
 ## Environment Variables
 
