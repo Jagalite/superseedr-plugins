@@ -66,7 +66,7 @@ services:
   # ... existing services (superseedr, gluetun)
 
   superseedr-rss:
-    build: ./plugins/RSS
+    build: ./plugins/RSS/superseedr-rss
     container_name: superseedr-rss
     environment:
       # Map the internal container path to the environment variable

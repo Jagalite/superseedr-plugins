@@ -44,14 +44,25 @@ services:
       - WATCH_DIR=/superseedr_data/watch_files
 ```
 
+## Contributing & Adding Plugins
+
+We encourage the community to expand the Superseedr ecosystem! Whether you have a brand new idea or want to provide a "duplicate" app (an alternative implementation of an existing plugin in a different language or with different features), your contributions are welcome.
+
+- **Create a New Plugin**: Follow the structure in the `plugins/` directory (e.g., `plugins/RSS/<your-rss-app>`). 
+- **Include Documentation**: Every plugin should include its own `README.md` with clear instructions on how to run it.
+- **Docker Support**: Built-in Docker support (Dockerfile/Compose instructions) is highly encouraged for sidecar compatibility.
+- **Reference Implementations**: Any apps prefixed with `superseedr-*` (like `superseedr-rss`) serve as official reference implementations for structure and logic.
+- **Language Agnostic**: Build your plugin in Python, Rust, Node.js, or whatever you prefer.
+- **Pull Requests**: Submit a PR to add your plugin to this monorepo!
+
 ## Available Plugins
 
-### ⚡ [RSS Plugin](./plugins/RSS)
+### ⚡ [RSS Plugin](./plugins/RSS/superseedr-rss)
 Automate downloads by monitoring RSS feeds and matching titles against custom regex patterns.
 
 ```yaml
   superseedr-rss:
-    build: ./plugins/RSS
+    build: ./plugins/RSS/superseedr-rss
     environment:
       - WATCH_DIR=/superseedr-watch
     volumes:
