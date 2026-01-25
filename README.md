@@ -2,6 +2,9 @@
 
 This repository is a monorepo containing various **sidecar applications** that extend the functionality of the [superseedr](https://github.com/Jagalite/superseedr) TUI BitTorrent client.
 
+> [!WARNING]
+> **Beta Status**: This repository and its plugins are currently in an active testing phase. Architecture, paths, and configurations are subject to change. Use with caution.
+
 ## How Plugins Work
 
 The Superseedr plugin ecosystem is built on a **Sidecar Architecture** and a **File-based API**.
