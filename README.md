@@ -42,6 +42,8 @@ services:
     environment:
       # Tell the plugin where to drop files (must point to subfolder)
       - WATCH_DIR=/superseedr_data/watch_files
+      # Tell the plugin where to read status from
+      - STATUS_DIR=/superseedr_data/status_files
 ```
 
 ## CLI Control
@@ -65,6 +67,7 @@ Superseedr periodically dumps its full internal state to a JSON file for externa
 
 - **Output Location**: `status_files/app_state.json` (inside your data directory)
 - **Content**: CPU/RAM usage, total transfer stats, and detailed metrics for every active torrent.
+- **Example Data**: See [superseedr_output_example.json](./superseedr_output_example.json) for a sample of the JSON structure.
 ## Contributing & Adding Plugins
 
 We encourage the community to expand the Superseedr ecosystem! Whether you have a brand new idea or want to provide a "duplicate" app (an alternative implementation of an existing plugin in a different language or with different features), your contributions are welcome.
@@ -89,10 +92,12 @@ Automate downloads by monitoring RSS feeds and matching titles against custom re
     environment:
       # Map the internal container path to the environment variable
       - WATCH_DIR=/superseedr-watch
+      - STATUS_DIR=/superseedr-status
       - DATA_DIR=/data
       - PORT=3000
     volumes:
       - superseedr-watch:/superseedr-watch
+      - superseedr-status:/superseedr-status
       - rss-plugin-data:/data
 ```
 

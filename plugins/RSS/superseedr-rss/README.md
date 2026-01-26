@@ -39,6 +39,9 @@ docker run -d \
   --restart unless-stopped \
   -p 3000:3000 \
   -v "$HOME/Library/Application Support/com.github.jagalite.superseedr/watch_files:/superseedr-watch" \
+  -v "$HOME/Library/Application Support/com.github.jagalite.superseedr/status_files:/superseedr-status" \
+  -e WATCH_DIR=/superseedr-watch \
+  -e STATUS_DIR=/superseedr-status \
   superseedr-rss
 ```
 
@@ -50,6 +53,9 @@ docker run -d \
   --restart unless-stopped \
   -p 3000:3000 \
   -v "$HOME/.local/share/jagalite.superseedr/watch_files:/superseedr-watch" \
+  -v "$HOME/.local/share/jagalite.superseedr/status_files:/superseedr-status" \
+  -e WATCH_DIR=/superseedr-watch \
+  -e STATUS_DIR=/superseedr-status \
   superseedr-rss
 ```
 
@@ -60,6 +66,9 @@ docker run -d `
   --restart unless-stopped `
   -p 3000:3000 `
   -v "$env:LOCALAPPDATA\jagalite\superseedr\data\watch_files:/superseedr-watch" `
+  -v "$env:LOCALAPPDATA\jagalite\superseedr\data\status_files:/superseedr-status" `
+  -e WATCH_DIR=/superseedr-watch `
+  -e STATUS_DIR=/superseedr-status `
   superseedr-rss
 ```
 
@@ -81,11 +90,14 @@ services:
     environment:
       # Map the internal container path to the environment variable
       - WATCH_DIR=/superseedr-watch
+      - STATUS_DIR=/superseedr-status
       - DATA_DIR=/data
       - PORT=3000
     volumes:
       # Mount the shared watch volume
       - superseedr-watch:/superseedr-watch
+      # Mount the shared status volume
+      - superseedr-status:/superseedr-status
       # Mount a volume for persistent settings and history
       - rss-plugin-data:/data
     # Attach to the VPN network if using gluetun
@@ -96,6 +108,7 @@ services:
 
 volumes:
   superseedr-watch:
+  superseedr-status:
   rss-plugin-data:
 ```
 
@@ -110,6 +123,7 @@ Regardless of your host operating system (Linux, Windows, or macOS), the Docker 
 | Variable | Description | Local Default | Docker Default |
 | :--- | :--- | :--- | :--- |
 | `WATCH_DIR` | Path to drop torrent/magnet files. | OS-Specific Defaults | `/superseedr-watch` |
+| `STATUS_DIR` | Path to read Superseedr status JSON. | OS-Specific Defaults | `/superseedr-status` |
 | `DATA_DIR` | Path to store `db.json` (settings/history). | Script Directory | `/data` |
 | `PORT` | Port for the web interface. | `3000` | `3000` |
 

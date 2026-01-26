@@ -1,0 +1,160 @@
+{
+    "run_time": 0,
+    "cpu_usage": 0.0,
+    "ram_usage_percent": 0.0,
+    "total_download_bps": 0,
+    "total_upload_bps": 0,
+    "torrents": {
+        "e37c26f5442e8d34733371e7fad201cac70e5d18": {
+            "torrent_control_state": "Running",
+            "info_hash": [
+                227,
+                14,
+                318,
+                245,
+                61,
+                46,
+                11,
+                52,
+                125,
+                51,
+                113,
+                231,
+                251,
+                210,
+                12,
+                20,
+                19,
+                14,
+                923,
+                24
+            ],
+            "torrent_or_magnet": "magnet:?xt=urn:btih:e37c26f5442e8d34733371e7fad201cac70e5d18&dn=Example_Torrent_Name_1&tr=http%3A%2F%2Ftracker.example.com%2Fannounce",
+            "torrent_name": "Example Torrent Name 1",
+            "download_path": "/home/user/Downloads/videos",
+            "container_name": "Example Torrent Name 1 [e37c26f5442e8d34733371e7fad201cac70e5d18]",
+            "file_priorities": {},
+            "number_of_successfully_connected_peers": 0,
+            "number_of_pieces_total": 0,
+            "number_of_pieces_completed": 0,
+            "download_speed_bps": 0,
+            "upload_speed_bps": 0,
+            "bytes_downloaded_this_tick": 0,
+            "bytes_uploaded_this_tick": 0,
+            "eta": {
+                "secs": 0,
+                "nanos": 0
+            },
+            "activity_message": "",
+            "next_announce_in": {
+                "secs": 0,
+                "nanos": 0
+            },
+            "total_size": 0,
+            "bytes_written": 0,
+            "blocks_in_this_tick": 0,
+            "blocks_out_this_tick": 0
+        },
+        "a6d63874fbb4b6c76580a9a9256b7df49e077e6c": {
+            "torrent_control_state": "Running",
+            "info_hash": [
+                166,
+                214,
+                56,
+                116,
+                251,
+                180,
+                182,
+                199,
+                101,
+                128,
+                169,
+                169,
+                37,
+                107,
+                125,
+                244,
+                158,
+                7,
+                126,
+                108
+            ],
+            "torrent_or_magnet": "magnet:?xt=urn:btih:a6d63874fbb4b6c76580a9a9256b7df49e077e6c&dn=Example_Torrent_Name_2&tr=http%3A%2F%2Ftracker.example.com%2Fannounce",
+            "torrent_name": "Example Torrent Name 2",
+            "download_path": "/home/user/Downloads/videos",
+            "container_name": "Example Torrent Name 2 [a6d63874fbb4b6c76580a9a9256b7df49e077e6c]",
+            "file_priorities": {},
+            "number_of_successfully_connected_peers": 0,
+            "number_of_pieces_total": 0,
+            "number_of_pieces_completed": 0,
+            "download_speed_bps": 0,
+            "upload_speed_bps": 0,
+            "bytes_downloaded_this_tick": 0,
+            "bytes_uploaded_this_tick": 0,
+            "eta": {
+                "secs": 0,
+                "nanos": 0
+            },
+            "activity_message": "",
+            "next_announce_in": {
+                "secs": 0,
+                "nanos": 0
+            },
+            "total_size": 0,
+            "bytes_written": 0,
+            "blocks_in_this_tick": 0,
+            "blocks_out_this_tick": 0
+        }
+    },
+    "settings": {
+        "client_id": "-SS1000-XXXXXXXXXXXX",
+        "client_port": 45695,
+        "torrents": [
+            {
+                "torrent_or_magnet": "magnet:?xt=urn:btih:e37c26f5442e8d34733371e7fad201cac70e5d18&dn=Example_Torrent_Name_1&tr=http%3A%2F%2Ftracker.example.com%2Fannounce",
+                "name": "Example Torrent Name 1",
+                "validation_status": true,
+                "download_path": "/home/user/Downloads/videos",
+                "container_name": "Example Torrent Name 1 [e37c26f5442e8d34733371e7fad201cac70e5d18]",
+                "torrent_control_state": "Running",
+                "file_priorities": {}
+            },
+            {
+                "torrent_or_magnet": "magnet:?xt=urn:btih:a6d63874fbb4b6c76580a9a9256b7df49e077e6c&dn=Example_Torrent_Name_2&tr=http%3A%2F%2Ftracker.example.com%2Fannounce",
+                "name": "Example Torrent Name 2",
+                "validation_status": true,
+                "download_path": "/home/user/Downloads/videos",
+                "container_name": "Example Torrent Name 2 [a6d63874fbb4b6c76580a9a9256b7df49e077e6c]",
+                "torrent_control_state": "Running",
+                "file_priorities": {}
+            }
+        ],
+        "lifetime_downloaded": 291408139537,
+        "lifetime_uploaded": 162992368496,
+        "private_client": false,
+        "torrent_sort_column": "Up",
+        "torrent_sort_direction": "Descending",
+        "peer_sort_column": "UL",
+        "peer_sort_direction": "Descending",
+        "watch_folder": null,
+        "default_download_folder": "/home/user/Downloads/videos",
+        "max_connected_peers": 2000,
+        "bootstrap_nodes": [
+            "router.utorrent.com:6881",
+            "router.bittorrent.com:6881",
+            "dht.transmissionbt.com:6881",
+            "dht.libtorrent.org:25401",
+            "router.cococorp.de:6881"
+        ],
+        "global_download_limit_bps": 0,
+        "global_upload_limit_bps": 0,
+        "max_concurrent_validations": 64,
+        "connection_attempt_permits": 50,
+        "resource_limit_override": null,
+        "upload_slots": 8,
+        "peer_upload_in_flight_limit": 4,
+        "tracker_fallback_interval_secs": 1800,
+        "client_leeching_fallback_interval_secs": 60,
+        "output_status_interval": 0
+    }
+}
