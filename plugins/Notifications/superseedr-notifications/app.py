@@ -231,7 +231,8 @@ if __name__ == '__main__':
     app.logger.info(f"Desktop notifications: {'Available' if DESKTOP_NOTIFICATIONS_AVAILABLE else 'Not available'}")
     
     # Run Flask app
+    port = int(os.getenv('PORT', 5000))
     try:
-        app.run(host='0.0.0.0', port=5000, debug=False)
+        app.run(host='0.0.0.0', port=port, debug=False)
     finally:
         scheduler.shutdown()

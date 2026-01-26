@@ -2,8 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -91,6 +96,12 @@ type StatusResponse struct {
 	Settings           Settings               `json:"settings"`
 }
 
+// UploadRequest defines the structure for JSON based uploads (magnet/url)
+type UploadRequest struct {
+	Type    string `json:"type"`    // "magnet" or "url"
+	Content string `json:"content"` // The actual magnet link or URL
+}
+
 func main() {
 	// Get configuration from environment variables
 	statusFile := os.Getenv("STATUS_FILE")
@@ -101,6 +112,17 @@ func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
+	}
+
+	watchDir := os.Getenv("WATCH_DIR")
+	if watchDir == "" {
+		log.Println("WARNING: WATCH_DIR environment variable not set. Uploads will function but files won't be processed by Superseedr.")
+		// Default to a local 'watch_files' directory if not set, for testing
+		watchDir = "./watch_files"
+	}
+	// Ensure watch directory exists
+	if err := os.MkdirAll(watchDir, 0755); err != nil {
+		log.Printf("Error creating watch directory: %v", err)
 	}
 
 	// Create Fiber app
@@ -121,7 +143,7 @@ func main() {
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
 		AllowHeaders: "Origin, Content-Type, Accept",
-		AllowMethods: "GET, OPTIONS",
+		AllowMethods: "GET, POST, OPTIONS",
 	}))
 
 	// Health check endpoint
@@ -166,6 +188,116 @@ func main() {
 		}
 
 		return c.JSON(stats)
+	})
+
+	// Upload endpoint
+	app.Post("/api/upload", func(c *fiber.Ctx) error {
+		// Check Content-Type to determine how to handle the request
+		contentType := c.Get("Content-Type")
+
+		// Handle Multipart Form (File Upload)
+		if len(contentType) >= 19 && contentType[:19] == "multipart/form-data" {
+			file, err := c.FormFile("file")
+			if err != nil {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"error": "No file uploaded",
+				})
+			}
+
+			// Validate file extension
+			if filepath.Ext(file.Filename) != ".torrent" {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"error": "Only .torrent files are allowed",
+				})
+			}
+
+			// Save file to watch directory
+			destination := filepath.Join(watchDir, file.Filename)
+			if err := c.SaveFile(file, destination); err != nil {
+				log.Printf("Error saving uploaded file: %v", err)
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": "Failed to save file",
+				})
+			}
+
+			log.Printf("Saved torrent file: %s", destination)
+			return c.JSON(fiber.Map{"status": "ok", "message": "Torrent file uploaded"})
+		}
+
+		// Handle JSON (Magnet or URL)
+		var req UploadRequest
+		if err := c.BodyParser(&req); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid request body",
+			})
+		}
+
+		if req.Content == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Content cannot be empty",
+			})
+		}
+
+		switch req.Type {
+		case "magnet":
+			// Create a .magnet file
+			filename := fmt.Sprintf("meta-%d.magnet", time.Now().UnixNano())
+			filepath := filepath.Join(watchDir, filename)
+			if err := os.WriteFile(filepath, []byte(req.Content), 0644); err != nil {
+				log.Printf("Error writing magnet file: %v", err)
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": "Failed to save magnet link",
+				})
+			}
+			log.Printf("Saved magnet link to: %s", filepath)
+			return c.JSON(fiber.Map{"status": "ok", "message": "Magnet link processed"})
+
+		case "url":
+			// Download the torrent file from the URL
+			resp, err := http.Get(req.Content)
+			if err != nil {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"error":   "Failed to download from URL",
+					"details": err.Error(),
+				})
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusOK {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"error": "Failed to download from URL: non-200 status code",
+				})
+			}
+
+			// Extract filename from URL or header, fallback to timestamp
+			filename := filepath.Base(req.Content)
+			if filepath.Ext(filename) != ".torrent" {
+				filename = fmt.Sprintf("download-%d.torrent", time.Now().UnixNano())
+			}
+
+			destination := filepath.Join(watchDir, filename)
+			outFile, err := os.Create(destination)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": "Failed to create local file",
+				})
+			}
+			defer outFile.Close()
+
+			if _, err := io.Copy(outFile, resp.Body); err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": "Failed to save downloaded file",
+				})
+			}
+
+			log.Printf("Downloaded torrent from URL to: %s", destination)
+			return c.JSON(fiber.Map{"status": "ok", "message": "Torrent file downloaded from URL"})
+
+		default:
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid upload type. Must be 'magnet' or 'url'",
+			})
+		}
 	})
 
 	// Start server
