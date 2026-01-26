@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  superseedr-notifications:
+    build: .
+    container_name: superseedr-notifications
+    ports:
+      - "5000:5000"
+    volumes:
+      # Mount the status files directory (read-only)
+      - /path/to/superseedr/status_files:/data/status_files:ro
+      # Mount the data directory for settings persistence
+      - ./data:/data
+    environment:
+      - STATUS_FILE=/data/status_files/app_state.json
+      - DATA_DIR=/data
+    restart: unless-stopped
+    networks:
+      - superseedr-network
+
+networks:
+  superseedr-network:
+    driver: bridge
