@@ -1,0 +1,34 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - STATUS_FILE=/data/superseedr_output_example.json
+      - PORT=8080
+    volumes:
+      # Mount the example file for testing initially
+      - ../../../superseedr_output_example.json:/data/superseedr_output_example.json
+      # In production, this would be:
+      # - superseedr-data:/data
+    networks:
+      - superseedr-webui-net
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:80"
+    networks:
+      - superseedr-webui-net
+
+networks:
+  superseedr-webui-net:
+    driver: bridge
+
+# volumes:
+#   superseedr-data:
+#     external: true

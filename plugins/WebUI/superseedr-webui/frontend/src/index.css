@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-card: var(--bg-card);
+  --color-bg-hover: var(--bg-hover);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-accent: var(--text-accent);
+
+  --color-border: var(--border-color);
+
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-secondary: var(--accent-secondary);
+
+  --color-status-success: var(--status-success);
+  --color-status-warning: var(--status-warning);
+  --color-status-error: var(--status-error);
+  --color-status-info: var(--status-info);
+}
+
+@layer base {
+
+  /* Modern Light Theme (Default) */
+  :root {
+    --bg-primary: #f8fafc;
+    /* slate-50 */
+    --bg-secondary: #f1f5f9;
+    /* slate-100 */
+    --bg-card: #ffffff;
+    --bg-hover: #e2e8f0;
+    /* slate-200 */
+
+    --text-primary: #0f172a;
+    /* slate-900 */
+    --text-secondary: #475569;
+    /* slate-600 */
+    --text-muted: #94a3b8;
+    /* slate-400 */
+    --text-accent: #2563eb;
+    /* blue-600 */
+
+    --border-color: #e2e8f0;
+    /* slate-200 */
+
+    --accent-primary: #3b82f6;
+    /* blue-500 */
+    --accent-secondary: #60a5fa;
+    /* blue-400 */
+
+    --status-success: #10b981;
+    /* emerald-500 */
+    --status-warning: #f59e0b;
+    /* amber-500 */
+    --status-error: #ef4444;
+    /* red-500 */
+    --status-info: #3b82f6;
+    /* blue-500 */
+  }
+
+  /* Dark/Midnight Theme */
+  [data-theme='dark'] {
+    --bg-primary: #0f172a;
+    /* slate-900 */
+    --bg-secondary: #1e293b;
+    /* slate-800 */
+    --bg-card: #1e293b;
+    /* slate-800 (elevated) */
+    --bg-hover: #334155;
+    /* slate-700 */
+
+    --text-primary: #f8fafc;
+    /* slate-50 */
+    --text-secondary: #cbd5e1;
+    /* slate-300 */
+    --text-muted: #64748b;
+    /* slate-500 */
+    --text-accent: #38bdf8;
+    /* sky-400 */
+
+    --border-color: #334155;
+    /* slate-700 */
+
+    --accent-primary: #38bdf8;
+    /* sky-400 */
+    --accent-secondary: #7dd3fc;
+    /* sky-300 */
+
+    --status-success: #34d399;
+    /* emerald-400 */
+    --status-warning: #fbbf24;
+    /* amber-400 */
+    --status-error: #f87171;
+    /* red-400 */
+    --status-info: #60a5fa;
+    /* blue-400 */
+  }
+
+  /* Nord Theme */
+  [data-theme='nord'] {
+    --bg-primary: #2e3440;
+    /* nord0 */
+    --bg-secondary: #3b4252;
+    /* nord1 */
+    --bg-card: #3b4252;
+    /* nord1 */
+    --bg-hover: #434c5e;
+    /* nord2 */
+
+    --text-primary: #d8dee9;
+    /* nord4 */
+    --text-secondary: #e5e9f0;
+    /* nord5 */
+    --text-muted: #4c566a;
+    /* nord3 highlight */
+    --text-accent: #88c0d0;
+    /* nord8 */
+
+    --border-color: #4c566a;
+    /* nord3 */
+
+    --accent-primary: #88c0d0;
+    /* nord8 */
+    --accent-secondary: #81a1c1;
+    /* nord9 */
+
+    --status-success: #a3be8c;
+    /* nord14 */
+    --status-warning: #ebcb8b;
+    /* nord13 */
+    --status-error: #bf616a;
+    /* nord11 */
+    --status-info: #81a1c1;
+    /* nord9 */
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary transition-colors duration-300;
+  }
+}
