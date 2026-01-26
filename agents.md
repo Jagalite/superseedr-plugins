@@ -31,6 +31,14 @@ To trigger a download in Superseedr, a plugin must create a file in the `WATCH_D
 - **File Extension:** `.torrent`
 - **Content:** The binary content of the `.torrent` file.
 
+#### C. Path to Torrent
+- **File Extension:** `.path`
+- **Content:** A plain text string containing the absolute local path to a `.torrent` file.
+
+#### D. Graceful Shutdown
+- **Filename:** `shutdown.cmd`
+- **Content:** Any (or empty). Presence of this file triggers a graceful shutdown.
+
 ### 3. Critical: Atomic Write Pattern
 Superseedr monitors the directory for *new* files. If a plugin writes a file slowly or in chunks, Superseedr might attempt to read it before it is complete, causing corruption.
 
@@ -71,3 +79,16 @@ When running outside of Docker (e.g., for testing), agents should attempt to det
 | **Linux** | `~/.local/share/jagalite.superseedr/watch_files` |
 | **macOS** | `~/Library/Application Support/com.github.jagalite.superseedr/watch_files` |
 | **Windows** | `%LOCALAPPDATA%\jagalite\superseedr\data\watch_files` |
+
+### 5. Status Monitoring
+
+Superseedr periodically dumps its internal state to a JSON file. Agents can read this file to monitor download progress, health, and system resource usage.
+
+- **File Path:** `status_files/app_state.json` (inside the data directory)
+
+**Usage for Agents:**
+Agents should treat this file as read-only. It provides a snapshot of all active torrents, including:
+- `name`: Torrent name
+- `progress`: Completion percentage
+- `download_speed` / `upload_speed`: Current throughput
+- `eta`: Estimated time to completion

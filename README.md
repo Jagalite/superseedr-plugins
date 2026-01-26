@@ -10,7 +10,7 @@ This repository is a monorepo containing various **sidecar applications** that e
 The Superseedr plugin ecosystem is built on a **Sidecar Architecture** and a **File-based API**.
 
 - **Decoupled Communication**: Plugins don't talk to Superseedr via complex networking or RPC. Instead, they interact via the physical filesystem. 
-- **The Watch Directory**: Every plugin is given access to Superseedr's `watch_files` directory. When a plugin wants Superseedr to download something, it simply drops a `.magnet` (text file containing the magnet link) or `.torrent` (binary torrent file) into that folder.
+- **The Watch Directory**: Every plugin is given access to Superseedr's `watch_files` directory. When a plugin wants Superseedr to download something, it simply drops a `.magnet` (text file containing the magnet link) or `.torrent` (binary torrent file) into that folder. Use `.path` to provide an absolute local path to a torrent file. Create a file named `shutdown.cmd` to initiate a graceful shutdown.
 - **Language Agnostic**: Because the interface is just the filesystem, plugins can be written in any language (Node.js, Python, Rust, Go, etc.) and run as standalone containers or local processes.
 - **Improved Isolation**: If a plugin or automation worker crashes, it doesn't affect the core Superseedr client.
 
@@ -44,6 +44,27 @@ services:
       - WATCH_DIR=/superseedr_data/watch_files
 ```
 
+## CLI Control
+
+You can control the running daemon using the built-in CLI commands. These commands write to the watch folder, allowing you to control the app from scripts or other containers.
+
+```bash
+# Add a magnet link
+superseedr add "magnet:?xt=urn:btih:..."
+
+# Add a torrent file by path
+superseedr add "/path/to/linux.iso.torrent"
+
+# Stop the client gracefully
+superseedr stop-client
+```
+
+## Monitoring & Status API
+
+Superseedr periodically dumps its full internal state to a JSON file for external monitoring dashboards or health checks.
+
+- **Output Location**: `status_files/app_state.json` (inside your data directory)
+- **Content**: CPU/RAM usage, total transfer stats, and detailed metrics for every active torrent.
 ## Contributing & Adding Plugins
 
 We encourage the community to expand the Superseedr ecosystem! Whether you have a brand new idea or want to provide a "duplicate" app (an alternative implementation of an existing plugin in a different language or with different features), your contributions are welcome.
