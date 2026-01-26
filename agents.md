@@ -92,3 +92,10 @@ Agents should treat this file as read-only. It provides a snapshot of all active
 - `progress`: Completion percentage
 - `download_speed` / `upload_speed`: Current throughput
 - `eta`: Estimated time to completion
+
+### 6. Docker Consolidation (Important)
+When creating a new plugin or application:
+1.  **Do NOT** rely solely on a local `docker-compose.yml` within the plugin directory.
+2.  **MUST** add the new service definition to the root `docker-compose.yml` (and `docker-compose.standalone.yml` if applicable).
+3.  Ensure volume mounts align with the core Superseedr service (e.g., mounting `superseedr-share`, `superseedr-data`).
+4.  This ensures users can run the entire stack with a single command.

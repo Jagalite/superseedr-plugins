@@ -101,5 +101,23 @@ Automate downloads by monitoring RSS feeds and matching titles against custom re
       - rss-plugin-data:/data
 ```
 
+### 🖥️ [Web UI Plugin](./plugins/WebUI/superseedr-webui)
+A modern, real-time dashboard for monitoring Superseedr.
+
+```yaml
+  superseedr-webui-frontend:
+    ports:
+      - "3001:80" # Accessibility via http://localhost:3001
+```
+
+### 🔔 [Notifications Plugin](./plugins/Notifications/superseedr-notifications)
+Send alerts to Discord, Telegram, or other services on torrent events.
+
+```yaml
+  superseedr-notifications:
+    ports:
+      - "5000:5000"
+```
+
 ---
 *Developed by the Superseedr Contributors.*

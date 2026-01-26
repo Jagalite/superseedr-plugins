@@ -16,6 +16,9 @@ This plugin follows the **Sidecar Pattern**:
 2. **Web UI Backend** (Go/Fiber) reads this file and serves it as a REST API.
 3. **Web UI Frontend** (React) polls this API to display the dashboard.
 
+> [!NOTE]
+> **Network Isolation & Gluetun**: Superseedr is often deployed behind a VPN container like **gluetun** for network isolation. Because of this, it may not share a network namespace with other containers. This sidecar architecture bypasses that limitation by using **shared volume mounts** to read the state from disk, allowing the Web UI to run in a separate container without needing direct network access to the Superseedr core.
+
 ## Quick Start (Docker Compose)
 
 1. Navigate to the plugin directory:
