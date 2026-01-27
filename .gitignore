@@ -9,8 +9,11 @@ package-lock.json
 !plugins/**/package-lock.json
 
 # --- Superseedr Config ---
-# Ignore the local environment file
+# Ignore the local environment file and data folders
 .env
+superseedr-config/
+superseedr-data/
+superseedr-share/
 
 # --- local temp---
 tmp
