@@ -6,11 +6,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - STATUS_FILE=/data/superseedr_output_example.json
+      - STATUS_FILE=/superseedr-status/superseedr_output_example.json
       - PORT=8080
+      - WATCH_DIR=/data/watch_files
     volumes:
       # Mount the example file for testing initially
-      - ../../../superseedr_output_example.json:/data/superseedr_output_example.json
+      - ../../../superseedr_output_example.json:/superseedr-status/superseedr_output_example.json
+      # Mount a local watch directory for testing
+      - ./watch_files:/data/watch_files
       # In production, this would be:
       # - superseedr-data:/data
     networks:

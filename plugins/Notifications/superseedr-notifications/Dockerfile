@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
-    STATUS_FILE=/data/status_files/app_state.json \
+    STATUS_FILE=/superseedr-status/app_state.json \
     DATA_DIR=/data
 
 # Install dependencies
@@ -18,7 +18,7 @@ COPY app.py .
 COPY templates/ templates/
 
 # Create data directory
-RUN mkdir -p /data
+RUN mkdir -p /data /superseedr-status
 
 # Expose Flask port
 EXPOSE 5000

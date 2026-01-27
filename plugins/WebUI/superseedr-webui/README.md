@@ -35,6 +35,50 @@ This plugin follows the **Sidecar Pattern**:
    - **Frontend**: http://localhost:3001
    - **Backend API**: http://localhost:8080/api/stats
 
+## Quick Start (Docker Run)
+
+To run the backend sidecar independently:
+
+**🍎 macOS**
+```bash
+docker run -d \
+  --name superseedr-webui-backend \
+  --restart unless-stopped \
+  -p 8080:8080 \
+  -v "$HOME/Library/Application Support/com.github.jagalite.superseedr/status_files:/superseedr-status:ro" \
+  -v "$(pwd)/watch_files:/data/watch_files" \
+  -e STATUS_FILE=/superseedr-status/app_state.json \
+  -e WATCH_DIR=/data/watch_files \
+  superseedr-webui-backend
+```
+
+**🐧 Linux**
+```bash
+docker run -d \
+  --name superseedr-webui-backend \
+  --user $(id -u):$(id -g) \
+  --restart unless-stopped \
+  -p 8080:8080 \
+  -v "$HOME/.local/share/jagalite.superseedr/status_files:/superseedr-status:ro" \
+  -v "$(pwd)/watch_files:/data/watch_files" \
+  -e STATUS_FILE=/superseedr-status/app_state.json \
+  -e WATCH_DIR=/data/watch_files \
+  superseedr-webui-backend
+```
+
+**🪟 Windows (PowerShell)**
+```powershell
+docker run -d `
+  --name superseedr-webui-backend `
+  --restart unless-stopped `
+  -p 8080:8080 `
+  -v "$env:LOCALAPPDATA\jagalite\superseedr\data\status_files:/superseedr-status:ro" `
+  -v "${PWD}\watch_files:/data/watch_files" `
+  -e STATUS_FILE=/superseedr-status/app_state.json `
+  -e WATCH_DIR=/data/watch_files `
+  superseedr-webui-backend
+```
+
 ## Development Setup
 
 ### Backend (Go)
@@ -55,6 +99,7 @@ npm run dev
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `STATUS_FILE` | Path to the Superseedr status JSON file | `superseedr_output_example.json` |
+| `WATCH_DIR` | Path to drop torrent/magnet files | `./watch_files` |
 | `PORT` | Port for the backend API | `8080` |
 | `VITE_API_URL` | API URL for the frontend | `http://localhost:8080/api/stats` |
 

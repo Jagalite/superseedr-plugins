@@ -58,9 +58,9 @@ docker run -d \
   --name superseedr-notifications \
   --restart unless-stopped \
   -p 5000:5000 \
-  -v "$HOME/Library/Application Support/com.github.jagalite.superseedr/status_files:/data/status_files:ro" \
+  -v "$HOME/Library/Application Support/com.github.jagalite.superseedr/status_files:/superseedr-status:ro" \
   -v "$(pwd)/data:/data" \
-  -e STATUS_FILE=/data/status_files/app_state.json \
+  -e STATUS_FILE=/superseedr-status/app_state.json \
   -e DATA_DIR=/data \
   superseedr-notifications
 ```
@@ -72,9 +72,9 @@ docker run -d \
   --user $(id -u):$(id -g) \
   --restart unless-stopped \
   -p 5000:5000 \
-  -v "$HOME/.local/share/jagalite.superseedr/status_files:/data/status_files:ro" \
+  -v "$HOME/.local/share/jagalite.superseedr/status_files:/superseedr-status:ro" \
   -v "$(pwd)/data:/data" \
-  -e STATUS_FILE=/data/status_files/app_state.json \
+  -e STATUS_FILE=/superseedr-status/app_state.json \
   -e DATA_DIR=/data \
   superseedr-notifications
 ```
@@ -85,9 +85,9 @@ docker run -d `
   --name superseedr-notifications `
   --restart unless-stopped `
   -p 5000:5000 `
-  -v "$env:LOCALAPPDATA\jagalite\superseedr\data\status_files:/data/status_files:ro" `
+  -v "$env:LOCALAPPDATA\jagalite\superseedr\data\status_files:/superseedr-status:ro" `
   -v "${PWD}\data:/data" `
-  -e STATUS_FILE=/data/status_files/app_state.json `
+  -e STATUS_FILE=/superseedr-status/app_state.json `
   -e DATA_DIR=/data `
   superseedr-notifications
 ```
@@ -108,11 +108,11 @@ services:
     build: ./plugins/Notifications/superseedr-notifications
     container_name: superseedr-notifications
     environment:
-      - STATUS_FILE=/data/status_files/app_state.json
+      - STATUS_FILE=/superseedr-status/app_state.json
       - DATA_DIR=/data
     volumes:
       # Mount the shared status volume (read-only)
-      - superseedr-status:/data/status_files:ro
+      - superseedr-status:/superseedr-status:ro
       # Mount a volume for persistent settings
       - notification-plugin-data:/data
     ports:
@@ -128,15 +128,16 @@ volumes:
 
 ### Path Mapping Note
 Regardless of your host operating system (Linux, Windows, or macOS), the Docker container uses internal paths.
-1. The `STATUS_FILE` environment variable must point to the **container side** path (e.g., `/data/status_files/app_state.json`).
+1. The `STATUS_FILE` environment variable must point to the **container side** path (e.g., `/superseedr-status/app_state.json`).
 2. Superseedr must be configured to write status files to the shared volume.
 
 ## Environment Variables
 
 | Variable | Description | Local Default | Docker Default |
 | :--- | :--- | :--- | :--- |
-| `STATUS_FILE` | Path to Superseedr's status JSON file. | OS-Specific | `/data/status_files/app_state.json` |
+| `STATUS_FILE` | Path to Superseedr's status JSON file. | OS-Specific | `/superseedr-status/app_state.json` |
 | `DATA_DIR` | Path to store settings and cache. | `./data` | `/data` |
+| `PORT` | Port for the web interface. | `5000` | `5000` |
 
 ## Adding Notification URLs
 

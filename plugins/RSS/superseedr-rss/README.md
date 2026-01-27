@@ -39,7 +39,7 @@ docker run -d \
   --restart unless-stopped \
   -p 3000:3000 \
   -v "$HOME/Library/Application Support/com.github.jagalite.superseedr/watch_files:/superseedr-watch" \
-  -v "$HOME/Library/Application Support/com.github.jagalite.superseedr/status_files:/superseedr-status" \
+  -v "$HOME/Library/Application Support/com.github.jagalite.superseedr/status_files:/superseedr-status:ro" \
   -e WATCH_DIR=/superseedr-watch \
   -e STATUS_DIR=/superseedr-status \
   superseedr-rss
@@ -53,20 +53,20 @@ docker run -d \
   --restart unless-stopped \
   -p 3000:3000 \
   -v "$HOME/.local/share/jagalite.superseedr/watch_files:/superseedr-watch" \
-  -v "$HOME/.local/share/jagalite.superseedr/status_files:/superseedr-status" \
+  -v "$HOME/.local/share/jagalite.superseedr/status_files:/superseedr-status:ro" \
   -e WATCH_DIR=/superseedr-watch \
   -e STATUS_DIR=/superseedr-status \
   superseedr-rss
 ```
 
-**VX Windows (PowerShell)**
+**🪟 Windows (PowerShell)**
 ```powershell
 docker run -d `
   --name superseedr-rss `
   --restart unless-stopped `
   -p 3000:3000 `
   -v "$env:LOCALAPPDATA\jagalite\superseedr\data\watch_files:/superseedr-watch" `
-  -v "$env:LOCALAPPDATA\jagalite\superseedr\data\status_files:/superseedr-status" `
+  -v "$env:LOCALAPPDATA\jagalite\superseedr\data\status_files:/superseedr-status:ro" `
   -e WATCH_DIR=/superseedr-watch `
   -e STATUS_DIR=/superseedr-status `
   superseedr-rss
@@ -97,7 +97,7 @@ services:
       # Mount the shared watch volume
       - superseedr-watch:/superseedr-watch
       # Mount the shared status volume
-      - superseedr-status:/superseedr-status
+      - superseedr-status:/superseedr-status:ro
       # Mount a volume for persistent settings and history
       - rss-plugin-data:/data
     # Attach to the VPN network if using gluetun

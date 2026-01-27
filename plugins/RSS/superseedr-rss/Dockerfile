@@ -25,7 +25,7 @@ ENV WATCH_DIR=/superseedr-watch
 ENV DATA_DIR=/data
 
 # Ensure directories exist
-RUN mkdir -p /superseedr-watch /data
+RUN mkdir -p /superseedr-watch /data /superseedr-status
 
 EXPOSE 3000
 

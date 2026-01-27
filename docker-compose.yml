@@ -53,7 +53,6 @@ services:
       - rss-data:/data
     environment:
       - WATCH_DIR=/superseedr-watch/watch_files
-      - STATUS_DIR=/superseedr-status/status_files
       - DATA_DIR=/data
       - PORT=3000
     restart: unless-stopped
@@ -64,11 +63,12 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/data/status_files:ro
+      - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-status:ro
       - notifications-data:/data
     environment:
-      - STATUS_FILE=/data/status_files/app_state.json
+      - STATUS_FILE=/superseedr-status/status_files/app_state.json
       - DATA_DIR=/data
+      - PORT=5000
     restart: unless-stopped
 
   superseedr-webui-backend:
@@ -77,9 +77,11 @@ services:
     ports:
       - "8082:8080"
     volumes:
-      - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-data:ro
+      - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-status:ro
+      - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-watch
     environment:
-      - STATUS_FILE=/superseedr-data/status_files/app_state.json
+      - STATUS_FILE=/superseedr-status/status_files/app_state.json
+      - WATCH_DIR=/superseedr-watch/watch_files
       - PORT=8080
     restart: unless-stopped
 
