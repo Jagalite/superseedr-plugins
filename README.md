@@ -26,13 +26,13 @@ We welcome contributions to expand the Superseedr plugin ecosystem! **AI-develop
 
 ## How Plugins Work
 
-The Superseedr plugin ecosystem is built on a **Sidecar Architecture** and a **File-based API**.
+The Superseedr plugin ecosystem leverages a **Sidecar Architecture** and a **File-based API** for seamless integration.
 
-- **Decoupled Communication**: Plugins don't talk to Superseedr via complex networking or RPC. Instead, they interact via the physical filesystem. 
-- **The Watch Directory**: Every plugin is given access to Superseedr's `watch_files` directory. When a plugin wants Superseedr to download something, it simply drops a `.magnet` (text file containing the magnet link) or `.torrent` (binary torrent file) into that folder. Use `.path` to provide an absolute local path to a torrent file. Create a file named `shutdown.cmd` to initiate a graceful shutdown.
-- **Language Agnostic**: Because the interface is just the filesystem, plugins can be written in any language (Node.js, Python, Rust, Go, etc.) and run as standalone containers or local processes.
-- **Improved Isolation**: If a plugin or automation worker crashes, it doesn't affect the core Superseedr client.
-- **Network Isolation & Volume Interactivity**: In VPN mode, Superseedr runs inside a `gluetun` container, isolating its network traffic. Plugins interact with or control Superseedr via shared Docker volumes (using the File-based API) rather than through the network, allowing them to remain outside the VPN tunnel while still communicating effectively.
+- **Docker-First Architecture**: Docker is our **platform of choice**. Plugins are designed to run as standalone containers (sidecars) alongside the core Superseedr client, ensuring a unified and portable environment.
+- **File-Based Communication**: We avoid complex networking or RPC dependencies. Plugins control Superseedr by reading from and writing to shared Docker volumes using our File-based API.
+- **The Watch Directory**: Plugins trigger downloads by simply dropping `.magnet` (magnet URI text) or `.torrent` (binary files) into Superseedr's `watch_files` directory.
+- **Network Isolation & Security**: In VPN mode, Superseedr runs inside a `gluetun` container, isolating its traffic. Plugins interact with the client via shared volumes while remaining outside the VPN tunnel, preserving both performance and security.
+- **Universal Compatibility**: Since the interface is the filesystem, plugins can be written in any language (Go, Python, Node.js, Rust, etc.) and remain completely decoupled from the core client's lifecycle.
 
 
 ## Docker Setup Instructions
@@ -42,17 +42,23 @@ This repository uses **Docker Profiles** to support different networking modes. 
 ### ⚡ Quick Start (Standalone Mode)
 Use this if you want to run Superseedr directly on your host network. **No configuration files are required.**
 
-1. **Launch the stack:**
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Jagalite/superseedr-plugins.git
+   cd superseedr-plugins
+   ```
+
+2. **Launch the stack:**
    ```bash
    docker compose --profile standalone up -d
    ```
 
-4. **Access your services:**
+3. **Access your services:**
+   - **Terminal Interface (TUI)**: `docker compose attach superseedr-standalone`
+
    - **WebUI Dashboard**: [http://localhost:19557](http://localhost:19557)
    - **RSS Manager**: [http://localhost:19554](http://localhost:19554)
    - **Notifications**: [http://localhost:19555](http://localhost:19555)
-
-   - **Terminal Interface (TUI)**: `docker compose attach superseedr-standalone`
 
    > To **detach** from the TUI while keeping it running, press `Ctrl+P` then `Ctrl+Q`. To **quit** the app, press `Q`.
 
@@ -126,8 +132,6 @@ Superseedr periodically dumps its full internal state to a JSON file for externa
 - **Output Location**: `status_files/app_state.json` (inside your data directory)
 - **Content**: CPU/RAM usage, total transfer stats, and detailed metrics for every active torrent.
 - **Example Data**: See [superseedr_output_example.json](./superseedr_output_example.json) for a sample of the JSON structure.
-
-
 
 ## Path & Volume Reference
 
