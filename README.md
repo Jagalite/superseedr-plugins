@@ -13,17 +13,8 @@ The Superseedr plugin ecosystem is built on a **Sidecar Architecture** and a **F
 - **The Watch Directory**: Every plugin is given access to Superseedr's `watch_files` directory. When a plugin wants Superseedr to download something, it simply drops a `.magnet` (text file containing the magnet link) or `.torrent` (binary torrent file) into that folder. Use `.path` to provide an absolute local path to a torrent file. Create a file named `shutdown.cmd` to initiate a graceful shutdown.
 - **Language Agnostic**: Because the interface is just the filesystem, plugins can be written in any language (Node.js, Python, Rust, Go, etc.) and run as standalone containers or local processes.
 - **Improved Isolation**: If a plugin or automation worker crashes, it doesn't affect the core Superseedr client.
+- **Network Isolation & Volume Interactivity**: In VPN mode, Superseedr runs inside a `gluetun` container, isolating its network traffic. Plugins interact with or control Superseedr via shared Docker volumes (using the File-based API) rather than through the network, allowing them to remain outside the VPN tunnel while still communicating effectively.
 
-## Path & Volume Reference
-
-To ensure standard communication, every plugin should be configured to target Superseedr's watch directory.
-
-| Platform | Default Watch Folder Location |
-| :--- | :--- |
-| **Docker** | `/root/.local/share/jagalite.superseedr/watch_files` |
-| **Linux** | `~/.local/share/jagalite.superseedr/watch_files` |
-| **macOS** | `~/Library/Application Support/com.github.jagalite.superseedr/watch_files` |
-| **Windows** | `C:\Users\{Username}\AppData\Local\jagalite\superseedr\data\watch_files` |
 
 ## Docker Setup Instructions
 
@@ -66,7 +57,7 @@ Use this to route all Superseedr traffic through a VPN using [Gluetun](https://g
    docker compose --profile vpn up -d
    ```
 
-### ⚙️ Optional Configuration (.env)
+### ⚙️ Configuration (.env)
 You can customize host paths and ports by creating a `.env` file in the project root.
 
 **Example (.env):**
@@ -116,6 +107,17 @@ Superseedr periodically dumps its full internal state to a JSON file for externa
 - **Output Location**: `status_files/app_state.json` (inside your data directory)
 - **Content**: CPU/RAM usage, total transfer stats, and detailed metrics for every active torrent.
 - **Example Data**: See [superseedr_output_example.json](./superseedr_output_example.json) for a sample of the JSON structure.
+
+## Path & Volume Reference
+
+To ensure standard communication, every plugin should be configured to target Superseedr's watch directory.
+
+| Platform | Default Watch Folder Location |
+| :--- | :--- |
+| **Docker** | `/root/.local/share/jagalite.superseedr/watch_files` |
+| **Linux** | `~/.local/share/jagalite.superseedr/watch_files` |
+| **macOS** | `~/Library/Application Support/com.github.jagalite.superseedr/watch_files` |
+| **Windows** | `C:\Users\{Username}\AppData\Local\jagalite\superseedr\data\watch_files` |
 ## Contributing & Adding Plugins
 
 We encourage the community to expand the Superseedr ecosystem! Whether you have a brand new idea or want to provide a "duplicate" app (an alternative implementation of an existing plugin in a different language or with different features), your contributions are welcome.

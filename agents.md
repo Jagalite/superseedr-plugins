@@ -93,9 +93,14 @@ Agents should treat this file as read-only. It provides a snapshot of all active
 - `download_speed` / `upload_speed`: Current throughput
 - `eta`: Estimated time to completion
 
-### 6. Docker Consolidation (Important)
-When creating a new plugin or application:
-1.  **Do NOT** rely solely on a local `docker-compose.yml` within the plugin directory.
-2.  **MUST** add the new service definition to the root `docker-compose.yml` (and `docker-compose.standalone.yml` if applicable).
-3.  Ensure volume mounts align with the core Superseedr service (e.g., mounting `superseedr-share`, `superseedr-data`).
-4.  This ensures users can run the entire stack with a single command.
+### 6. Docker-First Integration (Primary Mode)
+
+Docker is the **primary** method for running and integrating Superseedr plugins. While local/native execution is supported, it is reserved for **testing and development environments only**.
+
+**Requirements for Agents:**
+1.  **Root Integration:** Any new plugin or application **MUST** be added as a service definition in the root `docker-compose.yml`.
+2.  **Volume Alignment:** Ensure volume mounts strictly align with the core Superseedr service (e.g., mounting `superseedr-share` for the watch folder and `superseedr-data` for status monitoring).
+3.  **Network Isolation Awareness:** Plugins should be designed to operate independently of Superseedr's network tunnel. When Superseedr is in VPN mode (Gluetun), plugins remain on the standard network but control the client via the File-Based API over shared volumes.
+4.  **Configuration:** Use environment variables (like `WATCH_DIR` and `STATUS_FILE`) to allow the root Docker Compose to easily configure the containerized plugin.
+
+By following this Docker-first approach, users can manage the entire Superseedr ecosystem as a single, cohesive stack.
