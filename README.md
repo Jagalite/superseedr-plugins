@@ -41,10 +41,10 @@ Use this if you want to run Superseedr directly on your host network. **No confi
    - **WebUI Dashboard**: [http://localhost:19557](http://localhost:19557)
    - **RSS Manager**: [http://localhost:19554](http://localhost:19554)
    - **Notifications**: [http://localhost:19555](http://localhost:19555)
+
    - **Terminal Interface (TUI)**: `docker compose attach superseedr-standalone`
 
-   > [!TIP]
-   > To **detach** from the TUI while keeping it running, press `Ctrl+P` then `Ctrl+Q`. To **quit** the app, press `q`.
+   > To **detach** from the TUI while keeping it running, press `Ctrl+P` then `Ctrl+Q`. To **quit** the app, press `Q`.
 
 ---
 
@@ -65,8 +65,6 @@ Use this to route all Superseedr traffic through a VPN using [Gluetun](https://g
    ```bash
    docker compose --profile vpn up -d
    ```
-
----
 
 ### ⚙️ Optional Configuration (.env)
 You can customize host paths and ports by creating a `.env` file in the project root.
