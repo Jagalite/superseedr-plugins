@@ -27,88 +27,74 @@ To ensure standard communication, every plugin should be configured to target Su
 
 ## Docker Setup Instructions
 
-This setup consolidates the VPN and Standalone configurations into a single `docker-compose.yml` file using Docker Profiles.
+This repository uses **Docker Profiles** to support different networking modes. Choose the one that fits your needs.
 
-### 1. Prerequisites
-Ensure you have the following installed:
-- **Docker Engine**
-- **Docker Compose** (v1.28+ is required for profiles support)
+### ⚡ Quick Start (Standalone Mode)
+Use this if you want to run Superseedr directly on your host network. **No configuration files are required.**
 
-### 2. Configuration Files
-Before running, ensure you have the following files in the same directory:
+1. **Launch the stack:**
+   ```bash
+   docker compose --profile standalone up -d
+   ```
 
-#### A. `docker-compose.yml`
-Ensure your `docker-compose.yml` is updated with the latest consolidated YAML content (supporting `vpn` and `standalone` profiles).
+4. **Access your services:**
+   - **WebUI Dashboard**: [http://localhost:19557](http://localhost:19557)
+   - **RSS Manager**: [http://localhost:19554](http://localhost:19554)
+   - **Notifications**: [http://localhost:19555](http://localhost:19555)
+   - **Terminal Interface (TUI)**: `docker compose attach superseedr-standalone`
 
-#### B. `.env` (Environment Variables)
-Create a file named `.env` and define your host paths and settings.
-**Example:**
+   > [!TIP]
+   > To **detach** from the TUI while keeping it running, press `Ctrl+P` then `Ctrl+Q`. To **quit** the app, press `q`.
+
+---
+
+### 🔒 Advanced: VPN Mode
+Use this to route all Superseedr traffic through a VPN using [Gluetun](https://github.com/qdm12/gluetun).
+
+1. **Prerequisite**: Create a `.gluetun.env` file with your VPN provider details.
+   **Example (.gluetun.env):**
+   ```env
+   VPN_SERVICE_PROVIDER=custom
+   VPN_TYPE=wireguard
+   WIREGUARD_PRIVATE_KEY=wM...
+   WIREGUARD_ADDRESSES=10.13.x.x/32
+   ```
+   *See [.gluetun.env.example](./.gluetun.env.example) for more options.*
+
+2. **Launch the stack:**
+   ```bash
+   docker compose --profile vpn up -d
+   ```
+
+---
+
+### ⚙️ Optional Configuration (.env)
+You can customize host paths and ports by creating a `.env` file in the project root.
+
+**Example (.env):**
 ```env
-CLIENT_PORT=6881
-IMAGE_NAME=jagatranvo/superseedr:latest
+# Custom Host Paths
 HOST_SUPERSEEDR_DATA_PATH=./superseedr-data
-HOST_SUPERSEEDR_CONFIG_PATH=./superseedr-config
 HOST_SUPERSEEDR_SHARE_PATH=./superseedr-share
 
-# Plugin Ports (Optional)
+# Custom Ports
 RSS_PORT=19554
 NOTIFICATIONS_PORT=19555
-WEBUI_BACKEND_PORT=19556
 WEBUI_PORT=19557
 ```
+*See [.env.example](./.env.example) for all available variables.*
 
-#### C. `.gluetun.env` (VPN Credentials)
-Create a file named `.gluetun.env` containing your VPN provider details. This is required only if using the `vpn` profile.
-**Example:**
-```env
-VPN_SERVICE_PROVIDER=custom
-VPN_TYPE=wireguard
-WIREGUARD_PRIVATE_KEY=wM...
-WIREGUARD_ADDRESSES=10.13.x.x/32
-```
+---
 
-### 3. Running the Application
-You must choose **ONE** mode to run. You cannot run both simultaneously.
 
-#### Option 1: VPN Mode (Secure)
-Starts Gluetun, attaches Superseedr to the VPN network, and starts plugins.
+### 🛑 Stopping the Application
 ```bash
-docker compose --profile vpn up -d
-```
+# Standalone
+docker compose --profile standalone down
 
-#### Option 2: Standalone Mode (Direct Connection)
-Starts Superseedr with exposed ports directly on the host (no VPN).
-```bash
-docker compose --profile standalone up -d
-```
-
-### 4. Stopping the Application
-To stop the application, use the `down` command with the profile you started.
-
-**If running VPN:**
-```bash
+# VPN
 docker compose --profile vpn down
 ```
-
-**If running Standalone:**
-```bash
-docker compose --profile standalone down
-```
-
-### 5. Switching Modes
-Because both modes use the same container name (`superseedr`) to keep data consistent, you **MUST** stop one mode completely before starting the other.
-
-**Example (Switching from VPN to Standalone):**
-1. `docker compose --profile vpn down`
-2. `docker compose --profile standalone up -d`
-
-### 6. Accessing the Services
-Once running, the services are available at:
-
-- **WebUI Frontend**: [http://localhost:19557](http://localhost:19557)
-- **RSS Plugin**: [http://localhost:19554](http://localhost:19554)
-- **Notifications**: [http://localhost:19555](http://localhost:19555)
-- **WebUI Backend**: [http://localhost:19556](http://localhost:19556)
 
 ## CLI Control
 
@@ -148,39 +134,11 @@ We encourage the community to expand the Superseedr ecosystem! Whether you have 
 ### ⚡ [RSS Plugin](./plugins/RSS/superseedr-rss)
 Automate downloads by monitoring RSS feeds and matching titles against custom regex patterns.
 
-```yaml
-  superseedr-rss:
-    build: ./plugins/RSS/superseedr-rss
-    ports:
-      - "19554:3000"
-    environment:
-      - WATCH_DIR=/superseedr-watch/watch_files
-      - STATUS_DIR=/superseedr-status/status_files
-      - DATA_DIR=/data
-      - PORT=3000
-    volumes:
-      - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-watch
-      - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-status:ro
-      - rss-plugin-data:/data
-```
-
 ### 🖥️ [Web UI Plugin](./plugins/WebUI/superseedr-webui)
-A modern, real-time dashboard for monitoring Superseedr.
-
-```yaml
-  superseedr-webui-frontend:
-    ports:
-      - "19557:19557" # Accessibility via http://localhost:19557
-```
+A modern, real-time dashboard for monitoring Superseedr transfers and usage.
 
 ### 🔔 [Notifications Plugin](./plugins/Notifications/superseedr-notifications)
 Send alerts to Discord, Telegram, or other services on torrent events.
-
-```yaml
-  superseedr-notifications:
-    ports:
-      - "19555:5000"
-```
 
 ---
 *Developed by the Superseedr Contributors.*
