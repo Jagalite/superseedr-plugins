@@ -20,7 +20,7 @@ An RSS automation sidecar for the Superseedr BitTorrent client. This plugin moni
    ```
    *For development with auto-reload:* `npm run dev`
 
-The UI will be available at `http://localhost:3000`.
+The UI will be available at `http://localhost:19554`.
 
 ### Quick Start (Docker Run)
 
@@ -37,7 +37,7 @@ docker build -t superseedr-rss .
 docker run -d \
   --name superseedr-rss \
   --restart unless-stopped \
-  -p 3000:3000 \
+  -p 19554:3000 \
   -v "$HOME/Library/Application Support/com.github.jagalite.superseedr/watch_files:/superseedr-watch" \
   -v "$HOME/Library/Application Support/com.github.jagalite.superseedr/status_files:/superseedr-status:ro" \
   -e WATCH_DIR=/superseedr-watch \
@@ -51,7 +51,7 @@ docker run -d \
   --name superseedr-rss \
   --user $(id -u):$(id -g) \
   --restart unless-stopped \
-  -p 3000:3000 \
+  -p 19554:3000 \
   -v "$HOME/.local/share/jagalite.superseedr/watch_files:/superseedr-watch" \
   -v "$HOME/.local/share/jagalite.superseedr/status_files:/superseedr-status:ro" \
   -e WATCH_DIR=/superseedr-watch \
@@ -64,7 +64,7 @@ docker run -d \
 docker run -d `
   --name superseedr-rss `
   --restart unless-stopped `
-  -p 3000:3000 `
+  -p 19554:3000 `
   -v "$env:LOCALAPPDATA\jagalite\superseedr\data\watch_files:/superseedr-watch" `
   -v "$env:LOCALAPPDATA\jagalite\superseedr\data\status_files:/superseedr-status:ro" `
   -e WATCH_DIR=/superseedr-watch `
@@ -125,7 +125,7 @@ Regardless of your host operating system (Linux, Windows, or macOS), the Docker 
 | `WATCH_DIR` | Path to drop torrent/magnet files. | OS-Specific Defaults | `/superseedr-watch` |
 | `STATUS_DIR` | Path to read Superseedr status JSON. | OS-Specific Defaults | `/superseedr-status` |
 | `DATA_DIR` | Path to store `db.json` (settings/history). | Script Directory | `/data` |
-| `PORT` | Port for the web interface. | `3000` | `3000` |
+| `PORT` | Port for the web interface (host mapping: 19554). | `3000` | `3000` |
 
 ## How it Works
 1. **File-based API**: The plugin interacts with Superseedr by saving files into the common `WATCH_DIR`. Superseedr monitors this folder and picks up the new downloads.

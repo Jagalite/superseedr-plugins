@@ -40,7 +40,7 @@ A notification sidecar for the Superseedr BitTorrent client. This plugin monitor
    python app.py
    ```
 
-The UI will be available at `http://localhost:5000`.
+The UI will be available at `http://localhost:19555`.
 
 ## Quick Start (Docker Run)
 
@@ -57,7 +57,7 @@ docker build -t superseedr-notifications .
 docker run -d \
   --name superseedr-notifications \
   --restart unless-stopped \
-  -p 5000:5000 \
+  -p 19555:5000 \
   -v "$HOME/Library/Application Support/com.github.jagalite.superseedr/status_files:/superseedr-status:ro" \
   -v "$(pwd)/data:/data" \
   -e STATUS_FILE=/superseedr-status/app_state.json \
@@ -71,7 +71,7 @@ docker run -d \
   --name superseedr-notifications \
   --user $(id -u):$(id -g) \
   --restart unless-stopped \
-  -p 5000:5000 \
+  -p 19555:5000 \
   -v "$HOME/.local/share/jagalite.superseedr/status_files:/superseedr-status:ro" \
   -v "$(pwd)/data:/data" \
   -e STATUS_FILE=/superseedr-status/app_state.json \
@@ -84,7 +84,7 @@ docker run -d \
 docker run -d `
   --name superseedr-notifications `
   --restart unless-stopped `
-  -p 5000:5000 `
+  -p 19555:5000 `
   -v "$env:LOCALAPPDATA\jagalite\superseedr\data\status_files:/superseedr-status:ro" `
   -v "${PWD}\data:/data" `
   -e STATUS_FILE=/superseedr-status/app_state.json `
@@ -116,7 +116,7 @@ services:
       # Mount a volume for persistent settings
       - notification-plugin-data:/data
     ports:
-      - "5000:5000"
+      - "19555:5000"
     depends_on:
       - superseedr
     restart: unless-stopped
@@ -137,11 +137,11 @@ Regardless of your host operating system (Linux, Windows, or macOS), the Docker 
 | :--- | :--- | :--- | :--- |
 | `STATUS_FILE` | Path to Superseedr's status JSON file. | OS-Specific | `/superseedr-status/app_state.json` |
 | `DATA_DIR` | Path to store settings and cache. | `./data` | `/data` |
-| `PORT` | Port for the web interface. | `5000` | `5000` |
+| `PORT` | Port for the web interface (host mapping: 19555). | `5000` | `5000` |
 
 ## Adding Notification URLs
 
-Access the web UI at http://localhost:5000 and add notification URLs. Examples:
+Access the web UI at http://localhost:19555 and add notification URLs. Examples:
 
 - **Discord**: `discord://webhook_id/webhook_token`
 - **Slack**: `slack://TokenA/TokenB/TokenC`

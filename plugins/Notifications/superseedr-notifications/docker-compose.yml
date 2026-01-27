@@ -5,7 +5,7 @@ services:
     build: .
     container_name: superseedr-notifications
     ports:
-      - "5000:5000"
+      - "19555:5000"
     volumes:
       # Mount the status files directory (read-only)
       - /path/to/superseedr/status_files:/data/status_files:ro

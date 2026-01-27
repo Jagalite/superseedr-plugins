@@ -4,7 +4,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "19556:8080"
     environment:
       - STATUS_FILE=/superseedr-status/superseedr_output_example.json
       - PORT=8080
@@ -24,7 +24,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3001:80"
+      - "19557:80"
     networks:
       - superseedr-webui-net
 

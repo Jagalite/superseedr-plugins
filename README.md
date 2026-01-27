@@ -49,6 +49,12 @@ IMAGE_NAME=jagatranvo/superseedr:latest
 HOST_SUPERSEEDR_DATA_PATH=./superseedr-data
 HOST_SUPERSEEDR_CONFIG_PATH=./superseedr-config
 HOST_SUPERSEEDR_SHARE_PATH=./superseedr-share
+
+# Plugin Ports (Optional)
+RSS_PORT=19554
+NOTIFICATIONS_PORT=19555
+WEBUI_BACKEND_PORT=19556
+WEBUI_PORT=19557
 ```
 
 #### C. `.gluetun.env` (VPN Credentials)
@@ -99,10 +105,10 @@ Because both modes use the same container name (`superseedr`) to keep data consi
 ### 6. Accessing the Services
 Once running, the services are available at:
 
-- **WebUI Frontend**: [http://localhost:3001](http://localhost:3001)
-- **RSS Plugin**: [http://localhost:3000](http://localhost:3000)
-- **Notifications**: [http://localhost:5000](http://localhost:5000)
-- **WebUI Backend**: [http://localhost:8082](http://localhost:8082)
+- **WebUI Frontend**: [http://localhost:19557](http://localhost:19557)
+- **RSS Plugin**: [http://localhost:19554](http://localhost:19554)
+- **Notifications**: [http://localhost:19555](http://localhost:19555)
+- **WebUI Backend**: [http://localhost:19556](http://localhost:19556)
 
 ## CLI Control
 
@@ -146,7 +152,7 @@ Automate downloads by monitoring RSS feeds and matching titles against custom re
   superseedr-rss:
     build: ./plugins/RSS/superseedr-rss
     ports:
-      - "3000:3000"
+      - "19554:3000"
     environment:
       - WATCH_DIR=/superseedr-watch/watch_files
       - STATUS_DIR=/superseedr-status/status_files
@@ -164,7 +170,7 @@ A modern, real-time dashboard for monitoring Superseedr.
 ```yaml
   superseedr-webui-frontend:
     ports:
-      - "3001:80" # Accessibility via http://localhost:3001
+      - "19557:19557" # Accessibility via http://localhost:19557
 ```
 
 ### 🔔 [Notifications Plugin](./plugins/Notifications/superseedr-notifications)
@@ -173,7 +179,7 @@ Send alerts to Discord, Telegram, or other services on torrent events.
 ```yaml
   superseedr-notifications:
     ports:
-      - "5000:5000"
+      - "19555:5000"
 ```
 
 ---

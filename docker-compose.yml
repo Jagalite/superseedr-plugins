@@ -81,7 +81,7 @@ services:
     container_name: superseedr-rss
     profiles: ["vpn", "standalone"]
     ports:
-      - "3000:3000"
+      - "${RSS_PORT:-19554}:3000"
     volumes:
       - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-watch
       - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-status:ro
@@ -98,7 +98,7 @@ services:
     container_name: superseedr-notifications
     profiles: ["vpn", "standalone"]
     ports:
-      - "5000:5000"
+      - "${NOTIFICATIONS_PORT:-19555}:5000"
     volumes:
       - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-status:ro
       - notifications-data:/data
@@ -113,7 +113,7 @@ services:
     container_name: superseedr-webui-backend
     profiles: ["vpn", "standalone"]
     ports:
-      - "8082:8080"
+      - "${WEBUI_BACKEND_PORT:-19556}:8080"
     volumes:
       - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-status:ro
       - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-watch
@@ -127,11 +127,11 @@ services:
     build: 
       context: ./plugins/WebUI/superseedr-webui/frontend
       args:
-        - VITE_API_URL=http://localhost:8082/api/stats
+        - VITE_API_URL=http://localhost:19556/api/stats
     container_name: superseedr-webui-frontend
     profiles: ["vpn", "standalone"]
     ports:
-      - "3001:80"
+      - "${WEBUI_PORT:-19557}:80"
     restart: unless-stopped
 
 volumes:
