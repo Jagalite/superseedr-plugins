@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2025 The superseedr Contributors
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# --- Base Configuration (formerly common.yml) ---
 x-superseedr-common: &superseedr-common
   image: ${IMAGE_NAME:-jagatranvo/superseedr:latest}
   tty: true
@@ -89,6 +88,8 @@ services:
       - PORT=3000
     restart: unless-stopped
 
+  # ------------------------------------------
+
   superseedr-notifications:
     build: ./plugins/Notifications/superseedr-notifications
     container_name: superseedr-notifications
@@ -103,6 +104,8 @@ services:
       - DATA_DIR=/data
       - PORT=5000
     restart: unless-stopped
+
+  # ------------------------------------------
 
   superseedr-webui-backend:
     build: ./plugins/WebUI/superseedr-webui/backend
@@ -129,6 +132,8 @@ services:
     ports:
       - "${WEBUI_PORT:-19557}:80"
     restart: unless-stopped
+
+  # ------------------------------------------
 
 volumes:
   superseedr-data:
