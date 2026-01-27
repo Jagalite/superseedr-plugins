@@ -1,58 +1,94 @@
 # SPDX-FileCopyrightText: 2025 The superseedr Contributors
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+# --- Base Configuration (formerly common.yml) ---
+x-superseedr-common: &superseedr-common
+  build:
+    context: .
+    args:
+      - PRIVATE_BUILD=${PRIVATE_BUILD:-false}
+  image: ${IMAGE_NAME:-jagatranvo/superseedr:latest}
+  tty: true
+  stdin_open: true
+  init: true
+  entrypoint: ["superseedr"]
+  command: []
+  environment: &common-env
+    - SUPERSEEDR_DEFAULT_DOWNLOAD_FOLDER=/superseedr-data
+    - SUPERSEEDR_CLIENT_PORT=${CLIENT_PORT:-6881}
+  volumes: &common-volumes
+    - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-data
+    - ${HOST_SUPERSEEDR_CONFIG_PATH:-superseedr-config}:/root/.config/jagalite.superseedr
+    - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/root/.local/share/jagalite.superseedr
+  stop_grace_period: 0s
+
 services:
+  # ==========================================
+  # VPN SERVICE (Profile: vpn)
+  # ==========================================
   gluetun:
     image: qmcgaw/gluetun
     container_name: gluetun
+    profiles: ["vpn"]
     cap_add:
       - NET_ADMIN
     devices:
       - /dev/net/tun:/dev/net/tun
     volumes:
-      # Volume for Gluetun's internal data
       - gluetun-data:/gluetun
-      # Shared volume to write the port file
       - forwarded-port:/tmp/gluetun
     env_file:
       - .gluetun.env
     environment:
-      # If CLIENT_PORT is set in .env, this passes it to Gluetun.
-      # If CLIENT_PORT is NOT set, this will be empty, which is
-      # correct for users with dynamic port forwarding.
-      - FIREWALL_VPN_INPUT_PORTS=${CLIENT_PORT}     
+      - FIREWALL_VPN_INPUT_PORTS=${CLIENT_PORT}
     restart: unless-stopped
 
-  superseedr:
-    extends:
-      file: docker-compose.common.yml
-      service: superseedr
-    # This attaches superseedr to gluetun's network
+  # ==========================================
+  # APP: VPN MODE (Profile: vpn)
+  # ==========================================
+  superseedr-vpn:
+    <<: *superseedr-common
+    container_name: superseedr # Naming strictly for consistency
+    profiles: ["vpn"]
     network_mode: "service:gluetun"
     depends_on: [gluetun]
     volumes:
-      # --- App Volumes (from common.yml) ---
+      - forwarded-port:/port-data
+      # Inherit common volumes
       - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-data
       - ${HOST_SUPERSEEDR_CONFIG_PATH:-superseedr-config}:/root/.config/jagalite.superseedr
       - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/root/.local/share/jagalite.superseedr
-      
-      # --- Shared Port Volume ---
-      # This is where superseedr reads the port file
-      - forwarded-port:/port-data
+    restart: unless-stopped
 
-  # --- Plugins ---
+  # ==========================================
+  # APP: STANDALONE MODE (Profile: standalone)
+  # ==========================================
+  superseedr-standalone:
+    <<: *superseedr-common
+    container_name: superseedr # Naming strictly for consistency
+    profiles: ["standalone"]
+    ports:
+      - "${CLIENT_PORT:-6881}:${CLIENT_PORT:-6881}/tcp"
+      - "${CLIENT_PORT:-6881}:${CLIENT_PORT:-6881}/udp"
+    restart: unless-stopped
 
+  # ==========================================
+  # PLUGINS (Active in BOTH profiles)
+  # ==========================================
+  
   superseedr-rss:
     build: ./plugins/RSS/superseedr-rss
     container_name: superseedr-rss
+    profiles: ["vpn", "standalone"]
     ports:
       - "3000:3000"
     volumes:
       - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-watch
-      - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-status
+      - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-status:ro
       - rss-data:/data
     environment:
       - WATCH_DIR=/superseedr-watch/watch_files
+      - STATUS_DIR=/superseedr-status/status_files
       - DATA_DIR=/data
       - PORT=3000
     restart: unless-stopped
@@ -60,6 +96,7 @@ services:
   superseedr-notifications:
     build: ./plugins/Notifications/superseedr-notifications
     container_name: superseedr-notifications
+    profiles: ["vpn", "standalone"]
     ports:
       - "5000:5000"
     volumes:
@@ -74,6 +111,7 @@ services:
   superseedr-webui-backend:
     build: ./plugins/WebUI/superseedr-webui/backend
     container_name: superseedr-webui-backend
+    profiles: ["vpn", "standalone"]
     ports:
       - "8082:8080"
     volumes:
@@ -91,11 +129,11 @@ services:
       args:
         - VITE_API_URL=http://localhost:8082/api/stats
     container_name: superseedr-webui-frontend
+    profiles: ["vpn", "standalone"]
     ports:
       - "3001:80"
     restart: unless-stopped
 
-# Define all the volumes used
 volumes:
   superseedr-data:
   superseedr-config:

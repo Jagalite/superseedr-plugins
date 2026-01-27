@@ -25,26 +25,84 @@ To ensure standard communication, every plugin should be configured to target Su
 | **macOS** | `~/Library/Application Support/com.github.jagalite.superseedr/watch_files` |
 | **Windows** | `C:\Users\{Username}\AppData\Local\jagalite\superseedr\data\watch_files` |
 
-### Integration Example (Docker Compose)
+## Docker Setup Instructions
 
-```yaml
-services:
-  superseedr:
-    # ... existing superseedr config
-    volumes:
-      - superseedr-share:/root/.local/share/jagalite.superseedr
+This setup consolidates the VPN and Standalone configurations into a single `docker-compose.yml` file using Docker Profiles.
 
-  my-sidecar-plugin:
-    image: my-plugin:latest
-    volumes:
-      # Mount the SAME share volume to the sidecar
-      - superseedr-share:/superseedr_data
-    environment:
-      # Tell the plugin where to drop files (must point to subfolder)
-      - WATCH_DIR=/superseedr_data/watch_files
-      # Tell the plugin where to read status from
-      - STATUS_DIR=/superseedr_data/status_files
+### 1. Prerequisites
+Ensure you have the following installed:
+- **Docker Engine**
+- **Docker Compose** (v1.28+ is required for profiles support)
+
+### 2. Configuration Files
+Before running, ensure you have the following files in the same directory:
+
+#### A. `docker-compose.yml`
+Ensure your `docker-compose.yml` is updated with the latest consolidated YAML content (supporting `vpn` and `standalone` profiles).
+
+#### B. `.env` (Environment Variables)
+Create a file named `.env` and define your host paths and settings.
+**Example:**
+```env
+CLIENT_PORT=6881
+IMAGE_NAME=jagatranvo/superseedr:latest
+HOST_SUPERSEEDR_DATA_PATH=./superseedr-data
+HOST_SUPERSEEDR_CONFIG_PATH=./superseedr-config
+HOST_SUPERSEEDR_SHARE_PATH=./superseedr-share
 ```
+
+#### C. `.gluetun.env` (VPN Credentials)
+Create a file named `.gluetun.env` containing your VPN provider details. This is required only if using the `vpn` profile.
+**Example:**
+```env
+VPN_SERVICE_PROVIDER=custom
+VPN_TYPE=wireguard
+WIREGUARD_PRIVATE_KEY=wM...
+WIREGUARD_ADDRESSES=10.13.x.x/32
+```
+
+### 3. Running the Application
+You must choose **ONE** mode to run. You cannot run both simultaneously.
+
+#### Option 1: VPN Mode (Secure)
+Starts Gluetun, attaches Superseedr to the VPN network, and starts plugins.
+```bash
+docker compose --profile vpn up -d
+```
+
+#### Option 2: Standalone Mode (Direct Connection)
+Starts Superseedr with exposed ports directly on the host (no VPN).
+```bash
+docker compose --profile standalone up -d
+```
+
+### 4. Stopping the Application
+To stop the application, use the `down` command with the profile you started.
+
+**If running VPN:**
+```bash
+docker compose --profile vpn down
+```
+
+**If running Standalone:**
+```bash
+docker compose --profile standalone down
+```
+
+### 5. Switching Modes
+Because both modes use the same container name (`superseedr`) to keep data consistent, you **MUST** stop one mode completely before starting the other.
+
+**Example (Switching from VPN to Standalone):**
+1. `docker compose --profile vpn down`
+2. `docker compose --profile standalone up -d`
+
+### 6. Accessing the Services
+Once running, the services are available at:
+
+- **WebUI Frontend**: [http://localhost:3001](http://localhost:3001)
+- **RSS Plugin**: [http://localhost:3000](http://localhost:3000)
+- **Notifications**: [http://localhost:5000](http://localhost:5000)
+- **WebUI Backend**: [http://localhost:8082](http://localhost:8082)
 
 ## CLI Control
 
@@ -90,14 +148,13 @@ Automate downloads by monitoring RSS feeds and matching titles against custom re
     ports:
       - "3000:3000"
     environment:
-      # Map the internal container path to the environment variable
-      - WATCH_DIR=/superseedr-watch
-      - STATUS_DIR=/superseedr-status
+      - WATCH_DIR=/superseedr-watch/watch_files
+      - STATUS_DIR=/superseedr-status/status_files
       - DATA_DIR=/data
       - PORT=3000
     volumes:
-      - superseedr-watch:/superseedr-watch
-      - superseedr-status:/superseedr-status
+      - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-watch
+      - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-status:ro
       - rss-plugin-data:/data
 ```
 
