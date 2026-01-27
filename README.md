@@ -5,6 +5,25 @@ This repository is a monorepo containing various **sidecar applications** that e
 > [!WARNING]
 > **Beta Status**: This repository and its plugins are currently in an active testing phase. Architecture, paths, and configurations are subject to change. Use with caution.
 
+## Available Plugins
+
+### ⚡ [RSS Plugin](./plugins/RSS/superseedr-rss)
+Automate downloads by monitoring RSS feeds and matching titles against custom regex patterns.
+
+### 🖥️ [Web UI Plugin](./plugins/WebUI/superseedr-webui)
+A modern, real-time dashboard for monitoring Superseedr transfers and usage.
+
+### 🔔 [Notifications Plugin](./plugins/Notifications/superseedr-notifications)
+Send alerts to Discord, Telegram, or other services on torrent events.
+
+## Contributing & Adding Plugins
+
+We welcome contributions to expand the Superseedr plugin ecosystem! **AI-developed plugins are highly encouraged!**
+
+- **Technical Specifications**: For detailed implementation requirements (File-based API, Atomic Writes, Docker integration), please refer to **[AGENTS.md](./AGENTS.md)**.
+- **Reference Implementations**: Any apps prefixed with `superseedr-*` (like `superseedr-rss`) serve as official reference implementations for structure and logic.
+- **Submitting**: Build your plugin in any language, ensure it follows the Docker-first standards in [AGENTS.md](./AGENTS.md), and submit a Pull Request!
+
 ## How Plugins Work
 
 The Superseedr plugin ecosystem is built on a **Sidecar Architecture** and a **File-based API**.
@@ -108,6 +127,8 @@ Superseedr periodically dumps its full internal state to a JSON file for externa
 - **Content**: CPU/RAM usage, total transfer stats, and detailed metrics for every active torrent.
 - **Example Data**: See [superseedr_output_example.json](./superseedr_output_example.json) for a sample of the JSON structure.
 
+
+
 ## Path & Volume Reference
 
 To ensure standard communication, every plugin should be configured to target Superseedr's watch directory.
@@ -118,27 +139,6 @@ To ensure standard communication, every plugin should be configured to target Su
 | **Linux** | `~/.local/share/jagalite.superseedr/watch_files` |
 | **macOS** | `~/Library/Application Support/com.github.jagalite.superseedr/watch_files` |
 | **Windows** | `C:\Users\{Username}\AppData\Local\jagalite\superseedr\data\watch_files` |
-## Contributing & Adding Plugins
-
-We encourage the community to expand the Superseedr ecosystem! Whether you have a brand new idea or want to provide a "duplicate" app (an alternative implementation of an existing plugin in a different language or with different features), your contributions are welcome.
-
-- **Create a New Plugin**: Follow the structure in the `plugins/` directory (e.g., `plugins/RSS/<your-rss-app>`). 
-- **Include Documentation**: Every plugin should include its own `README.md` with clear instructions on how to run it.
-- **Docker Support**: Built-in Docker support (Dockerfile/Compose instructions) is highly encouraged for sidecar compatibility.
-- **Reference Implementations**: Any apps prefixed with `superseedr-*` (like `superseedr-rss`) serve as official reference implementations for structure and logic.
-- **Language Agnostic**: Build your plugin in Python, Rust, Node.js, or whatever you prefer.
-- **Pull Requests**: Submit a PR to add your plugin to this monorepo!
-
-## Available Plugins
-
-### ⚡ [RSS Plugin](./plugins/RSS/superseedr-rss)
-Automate downloads by monitoring RSS feeds and matching titles against custom regex patterns.
-
-### 🖥️ [Web UI Plugin](./plugins/WebUI/superseedr-webui)
-A modern, real-time dashboard for monitoring Superseedr transfers and usage.
-
-### 🔔 [Notifications Plugin](./plugins/Notifications/superseedr-notifications)
-Send alerts to Discord, Telegram, or other services on torrent events.
 
 ---
 *Developed by the Superseedr Contributors.*
