@@ -77,20 +77,6 @@ You can mix and match profiles to suit your needs.
 # VPN Mode + RSS only
 docker compose --profile vpn --profile rss up -d
 ```
-
-### ⚙️ Configuration (.env)
-Customize host paths and ports by creating a `.env` file in the project root. You can also define your default profiles here using `COMPOSE_PROFILES`.
-
-**Example (.env):**
-```env
-# Define default profiles to load when running 'docker compose up'
-COMPOSE_PROFILES=standalone,plugins
-
-# Custom Ports
-RSS_PORT=19554
-WEBUI_PORT=19557
-```
-
 ---
 
 ### 🛑 Stopping the stack
