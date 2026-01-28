@@ -1,59 +1,131 @@
 # SPDX-FileCopyrightText: 2025 The superseedr Contributors
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+# ------------------------------------------------------------------------------
+# SHARED ANCHORS (Core App)
+# ------------------------------------------------------------------------------
+
+x-superseedr-common: &superseedr-common
+  image: ${IMAGE_NAME:-jagatranvo/superseedr:latest}
+  tty: true
+  stdin_open: true
+  init: true
+  entrypoint: ["superseedr"]
+  command: []
+  environment:
+    - SUPERSEEDR_DEFAULT_DOWNLOAD_FOLDER=/superseedr-data
+    - SUPERSEEDR_CLIENT_PORT=${CLIENT_PORT:-6881}
+  volumes:
+    - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-data
+    - ${HOST_SUPERSEEDR_CONFIG_PATH:-superseedr-config}:/root/.config/jagalite.superseedr
+    - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/root/.local/share/jagalite.superseedr
+  stop_grace_period: 0s
+
+# ------------------------------------------------------------------------------
+# SHARED ANCHORS (Plugins)
+# ------------------------------------------------------------------------------
+
+# Shared volume definition
+x-share-volume: &share-v ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-share
+
+# Common environment variables for all plugins
+x-common-env: &common-env
+  WATCH_DIR: /superseedr-share/watch_files
+  STATUS_DIR: /superseedr-share/status_files
+  STATUS_FILE: /superseedr-share/status_files/app_state.json
+
+# Common service settings
+x-plugin-common: &plugin-common
+  restart: unless-stopped
+  volumes:
+    - *share-v
+
 services:
+  # ==========================================
+  # VPN SERVICE (Profile: vpn)
+  # ==========================================
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    profiles: ["vpn"]
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - gluetun-data:/gluetun
+      - forwarded-port:/tmp/gluetun
+    env_file:
+      - .gluetun.env
+    environment:
+      - FIREWALL_VPN_INPUT_PORTS=${CLIENT_PORT}
+    restart: unless-stopped
+
+  # ==========================================
+  # APP: VPN MODE (Profile: vpn)
+  # ==========================================
+  superseedr-vpn:
+    <<: *superseedr-common
+    container_name: superseedr # Naming strictly for consistency
+    profiles: ["vpn"]
+    network_mode: "service:gluetun"
+    depends_on: [gluetun]
+    volumes:
+      - forwarded-port:/port-data
+      # Inherit common volumes
+      - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-data
+      - ${HOST_SUPERSEEDR_CONFIG_PATH:-superseedr-config}:/root/.config/jagalite.superseedr
+      - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/root/.local/share/jagalite.superseedr
+    restart: unless-stopped
+
   # ==========================================
   # PLUGINS
   # ==========================================
-  
+
   superseedr-rss:
+    <<: *plugin-common
     build: ./plugins/RSS/superseedr-rss
     container_name: superseedr-rss
-    profiles: ["rss"]
+    profiles: ["rss", "plugins"]
     ports:
       - "${RSS_PORT:-19554}:3000"
     volumes:
-      - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-share
+      - *share-v
       - rss-data:/data
     environment:
-      - WATCH_DIR=/superseedr-share/watch_files
-      - STATUS_DIR=/superseedr-share/status_files
-      - DATA_DIR=/data
-      - PORT=3000
-    restart: unless-stopped
+      <<: *common-env
+      DATA_DIR: /data
+      PORT: 3000
 
   # ------------------------------------------
 
   superseedr-notifications:
+    <<: *plugin-common
     build: ./plugins/Notifications/superseedr-notifications
     container_name: superseedr-notifications
-    profiles: ["notifications"]
+    profiles: ["notifications", "plugins"]
     ports:
       - "${NOTIFICATIONS_PORT:-19555}:5000"
     volumes:
-      - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-share:ro
+      - *share-v
       - notifications-data:/data
     environment:
-      - STATUS_FILE=/superseedr-share/status_files/app_state.json
-      - DATA_DIR=/data
-      - PORT=5000
-    restart: unless-stopped
+      <<: *common-env
+      DATA_DIR: /data
+      PORT: 5000
 
   # ------------------------------------------
 
   superseedr-webui-backend:
+    <<: *plugin-common
     build: ./plugins/WebUI/superseedr-webui/backend
     container_name: superseedr-webui-backend
-    profiles: ["webui"]
+    profiles: ["webui", "plugins"]
     ports:
       - "${WEBUI_BACKEND_PORT:-19556}:8080"
-    volumes:
-      - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-share
     environment:
-      - STATUS_FILE=/superseedr-share/status_files/app_state.json
-      - WATCH_DIR=/superseedr-share/watch_files
-      - PORT=8080
-    restart: unless-stopped
+      <<: *common-env
+      PORT: 8080
 
   superseedr-webui-frontend:
     build: 
@@ -61,12 +133,16 @@ services:
       args:
         - VITE_API_URL=http://localhost:19556/api/stats
     container_name: superseedr-webui-frontend
-    profiles: ["webui"]
+    profiles: ["webui", "plugins"]
     ports:
       - "${WEBUI_PORT:-19557}:80"
     restart: unless-stopped
 
 volumes:
+  superseedr-data:
+  superseedr-config:
   superseedr-share:
+  gluetun-data:
+  forwarded-port:
   rss-data:
   notifications-data:

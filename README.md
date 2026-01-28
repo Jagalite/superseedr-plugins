@@ -37,77 +37,66 @@ The Superseedr plugin ecosystem leverages a **Sidecar Architecture** and a **Fil
 
 ## Docker Setup Instructions
 
-This repository uses **Docker Profiles** to support different networking modes. Choose the one that fits your needs.
+This repository uses **Docker Profiles** to support granular deployment. You can choose to run the core client, all plugins, or a specific combination.
 
-### ⚡ Quick Start (Standalone Mode)
-Use this if you want to run Superseedr directly on your host network. **No configuration files are required.**
+### 🚀 Deployment Scenarios
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Jagalite/superseedr-plugins.git
-   cd superseedr-plugins
-   ```
+#### 1. Full Stack (Standard)
+Launch the core client and all available plugins together.
+```bash
+# Standalone Mode
+docker compose --profile standalone --profile plugins up -d
 
-2. **Launch the stack:**
-   ```bash
-   docker compose --profile standalone up -d
-   ```
+# VPN Mode
+docker compose --profile vpn --profile plugins up -d
+```
 
-3. **Access your services:**
-   - **Terminal Interface (TUI)**: `docker compose attach superseedr-standalone`
+#### 2. Core App Only
+Launch only the Superseedr client without any sidecar plugins.
+```bash
+# Standalone Mode
+docker compose --profile standalone up -d
 
-   - **WebUI Dashboard**: [http://localhost:19557](http://localhost:19557)
-   - **RSS Manager**: [http://localhost:19554](http://localhost:19554)
-   - **Notifications**: [http://localhost:19555](http://localhost:19555)
+# VPN Mode
+docker compose --profile vpn up -d
+```
 
-   > To **detach** from the TUI while keeping it running, press `Ctrl+P` then `Ctrl+Q`. To **quit** the app, press `Q`.
+#### 3. Plugins Only
+Launch only the plugin stack (useful if you are running the core client on a different machine or as a native app).
+```bash
+# Launch ALL plugins
+docker compose --profile plugins up -d
 
----
+# Launch a SPECIFIC plugin (e.g., RSS only)
+docker compose --profile rss up -d
+```
 
-### 🔒 Advanced: VPN Mode
-Use this to route all Superseedr traffic through a VPN using [Gluetun](https://github.com/qdm12/gluetun).
-
-1. **Prerequisite**: Create a `.gluetun.env` file with your VPN provider details.
-   **Example (.gluetun.env):**
-   ```env
-   VPN_SERVICE_PROVIDER=custom
-   VPN_TYPE=wireguard
-   WIREGUARD_PRIVATE_KEY=wM...
-   WIREGUARD_ADDRESSES=10.13.x.x/32
-   ```
-   *See [.gluetun.env.example](./.gluetun.env.example) for more options.*
-
-2. **Launch the stack:**
-   ```bash
-   docker compose --profile vpn up -d
-   ```
+#### 4. Custom Mix
+You can mix and match profiles to suit your needs.
+```bash
+# VPN Mode + RSS only
+docker compose --profile vpn --profile rss up -d
+```
 
 ### ⚙️ Configuration (.env)
-You can customize host paths and ports by creating a `.env` file in the project root.
+Customize host paths and ports by creating a `.env` file in the project root. You can also define your default profiles here using `COMPOSE_PROFILES`.
 
 **Example (.env):**
 ```env
-# Custom Host Paths
-HOST_SUPERSEEDR_DATA_PATH=./superseedr-data
-HOST_SUPERSEEDR_SHARE_PATH=./superseedr-share
+# Define default profiles to load when running 'docker compose up'
+COMPOSE_PROFILES=standalone,plugins
 
 # Custom Ports
 RSS_PORT=19554
-NOTIFICATIONS_PORT=19555
 WEBUI_PORT=19557
 ```
-*See [.env.example](./.env.example) for all available variables.*
 
 ---
 
-
-### 🛑 Stopping the Application
+### 🛑 Stopping the stack
+To stop everything regardless of profiles:
 ```bash
-# Standalone
-docker compose --profile standalone down
-
-# VPN
-docker compose --profile vpn down
+docker compose down
 ```
 
 ## CLI Control
