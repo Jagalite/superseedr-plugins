@@ -63,6 +63,8 @@ docker compose --profile vpn up -d
 
 #### 3. Plugins Only
 Launch only the plugin stack (useful if you are running the core client on a different machine or as a native app).
+
+
 ```bash
 # Launch ALL plugins
 docker compose --profile plugins up -d
@@ -71,12 +73,10 @@ docker compose --profile plugins up -d
 docker compose --profile rss up -d
 ```
 
-#### 4. Custom Mix
-You can mix and match profiles to suit your needs.
-```bash
-# VPN Mode + RSS only
-docker compose --profile vpn --profile rss up -d
-```
+> To connect plugins to a host-installed Superseedr, you must:
+> 1. Create a `.env` file (`cp .env.example .env`).
+> 2. Set the `HOST_SUPERSEEDR_CONFIG_PATH` and `HOST_SUPERSEEDR_SHARE_PATH` to match your local watch folder and config folders to ensure shared filesystem communication.
+
 ---
 
 ### 🛑 Stopping the stack
