@@ -79,6 +79,18 @@ services:
     restart: unless-stopped
 
   # ==========================================
+  # APP: STANDALONE MODE (Profile: standalone)
+  # ==========================================
+  superseedr-standalone:
+    <<: *superseedr-common
+    container_name: superseedr # Naming strictly for consistency
+    profiles: ["standalone"]
+    ports:
+      - "${CLIENT_PORT:-6881}:${CLIENT_PORT:-6881}/tcp"
+      - "${CLIENT_PORT:-6881}:${CLIENT_PORT:-6881}/udp"
+    restart: unless-stopped
+
+  # ==========================================
   # PLUGINS
   # ==========================================
 
