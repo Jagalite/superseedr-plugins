@@ -78,12 +78,11 @@ services:
     ports:
       - "${RSS_PORT:-19554}:3000"
     volumes:
-      - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-watch
-      - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-status:ro
+      - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-share
       - rss-data:/data
     environment:
-      - WATCH_DIR=/superseedr-watch/watch_files
-      - STATUS_DIR=/superseedr-status/status_files
+      - WATCH_DIR=/superseedr-share/watch_files
+      - STATUS_DIR=/superseedr-share/status_files
       - DATA_DIR=/data
       - PORT=3000
     restart: unless-stopped
@@ -97,10 +96,10 @@ services:
     ports:
       - "${NOTIFICATIONS_PORT:-19555}:5000"
     volumes:
-      - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-status:ro
+      - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-share:ro
       - notifications-data:/data
     environment:
-      - STATUS_FILE=/superseedr-status/status_files/app_state.json
+      - STATUS_FILE=/superseedr-share/status_files/app_state.json
       - DATA_DIR=/data
       - PORT=5000
     restart: unless-stopped
@@ -114,11 +113,10 @@ services:
     ports:
       - "${WEBUI_BACKEND_PORT:-19556}:8080"
     volumes:
-      - ${HOST_SUPERSEEDR_DATA_PATH:-superseedr-data}:/superseedr-status:ro
-      - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-watch
+      - ${HOST_SUPERSEEDR_SHARE_PATH:-superseedr-share}:/superseedr-share
     environment:
-      - STATUS_FILE=/superseedr-status/status_files/app_state.json
-      - WATCH_DIR=/superseedr-watch/watch_files
+      - STATUS_FILE=/superseedr-share/status_files/app_state.json
+      - WATCH_DIR=/superseedr-share/watch_files
       - PORT=8080
     restart: unless-stopped
 
