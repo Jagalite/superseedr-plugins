@@ -77,7 +77,14 @@ docker compose --profile rss up -d
 > 1. Create a `.env` file (`cp .env.example .env`).
 > 2. Set the `HOST_SUPERSEEDR_CONFIG_PATH` and `HOST_SUPERSEEDR_SHARE_PATH` to match your local watch folder and config folders to ensure shared filesystem communication.
 
----
+#### 4. **Access your services:**
+  - **WebUI Dashboard**: [http://localhost:19557](http://localhost:19557)
+  - **RSS Manager**: [http://localhost:19554](http://localhost:19554)
+  - **Notifications**: [http://localhost:19555](http://localhost:19555)
+
+  - **Terminal Interface (TUI)**: `docker compose attach superseedr-standalone`
+
+  > To **detach** from the TUI while keeping it running, press `Ctrl+P` then `Ctrl+Q`. To **quit** the app, press `Q`.
 
 ### 🛑 Stopping the stack
 To stop everything regardless of profiles:
