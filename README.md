@@ -82,7 +82,9 @@ docker compose --profile rss up -d
   - **RSS Manager**: [http://localhost:19554](http://localhost:19554)
   - **Notifications**: [http://localhost:19555](http://localhost:19555)
 
-  - **Terminal Interface (TUI)**: `docker compose attach superseedr-standalone`
+  - **Terminal Interface (TUI)**:
+  - `docker compose attach superseedr-standalone`
+  - `docker compose attach superseedr-vpn`
 
   > To **detach** from the TUI while keeping it running, press `Ctrl+P` then `Ctrl+Q`. To **quit** the app, press `Q`.
 
