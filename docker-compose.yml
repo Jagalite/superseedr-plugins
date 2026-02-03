@@ -71,6 +71,10 @@ services:
     network_mode: "service:gluetun"
     depends_on: [gluetun]
     volumes:
+      # Keep the common volumes from the anchor
+      - ${HOST_SUPERSEEDR_DATA_PATH:-./superseedr-data}:/superseedr-data
+      - ${HOST_SUPERSEEDR_CONFIG_PATH:-./superseedr-config}:/root/.config/jagalite.superseedr
+      - ${HOST_SUPERSEEDR_SHARE_PATH:-./superseedr-share}:/root/.local/share/jagalite.superseedr
       - forwarded-port:/port-data
     restart: unless-stopped
 
@@ -144,6 +148,27 @@ services:
     profiles: ["webui", "plugins"]
     ports:
       - "${WEBUI_PORT:-19557}:80"
+    restart: unless-stopped
+
+  # --------------------------
+  samba:
+    image: dperson/samba
+    container_name: superseedr-samba
+    profiles: ["samba", "plugins"]
+    environment:
+      - TZ=${TZ:-America/New_York}
+      # Syntax: SHARE=share_name;/path;browsable;readonly;guest;users;admins;writelist;comment
+      - SHARE=downloads;/data;yes;no;yes;all;none;;Superseedr Downloads
+      - WORKGROUP=WORKGROUP
+      - PERMISSIONS=true
+    ports:
+      - "137:137/udp"
+      - "138:138/udp"
+      - "139:139/tcp"
+      - "4445:445/tcp"
+    volumes:
+      # MUST match the data path used in your superseedr service
+      - ${HOST_SUPERSEEDR_DATA_PATH:-./superseedr-data}:/data
     restart: unless-stopped
 
 volumes:
